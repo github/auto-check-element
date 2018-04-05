@@ -2,17 +2,25 @@
   "name": "auto-check-element",
   "version": "1.0.0",
   "description": "A input element that checks a endpoint to see if the value entered is valid",
-  "main": "index.js",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.umd.js",
+  "module": "dist/index.esm.js",
   "scripts": {
-    "test": "npm test"
+    "clean": "rm -rf dist",
+    "lint": "eslint src/ && flow check",
+    "build": "rollup -c && rollup -c rollup.config.umd.js",
+    "test": "npm run lint",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/koddsson/auto-check-element.git"
   },
   "keywords": [
-    "custom-element",
-    "web-component",
+    "custom element",
+    "web component",
     "auto-check",
     "input"
   ],
@@ -21,5 +29,17 @@
   "bugs": {
     "url": "https://github.com/koddsson/auto-check-element/issues"
   },
-  "homepage": "https://github.com/koddsson/auto-check-element#readme"
+  "homepage": "https://github.com/koddsson/auto-check-element#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "eslint": "^4.18.1",
+    "eslint-plugin-github": "^0.23.0",
+    "rollup": "^0.56.3",
+    "rollup-plugin-babel": "^3.0.3"
+  },
+  "dependencies": {
+    "babel-runtime": "^6.26.0"
+  }
 }
