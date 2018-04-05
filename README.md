@@ -1,4 +1,4 @@
-### <auto-check>
+### `<auto-check>`
 
 Input element that validates the value provided against
 a endpoint. Provide a URL and a CSRF token and the autocheck
