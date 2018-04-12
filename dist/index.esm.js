@@ -73,6 +73,23 @@ var toConsumableArray = function (arr) {
   }
 };
 
+var XHRError = function (_Error) {
+  inherits(XHRError, _Error);
+
+  function XHRError(statusCode, responseText, contentType) {
+    classCallCheck(this, XHRError);
+
+    var _this = possibleConstructorReturn(this, (XHRError.__proto__ || Object.getPrototypeOf(XHRError)).call(this));
+
+    _this.statusCode = statusCode;
+    _this.responseText = responseText;
+    _this.contentType = contentType;
+    return _this;
+  }
+
+  return XHRError;
+}(Error);
+
 function _CustomElement() {
   return Reflect.construct(HTMLElement, [], this.__proto__.constructor);
 }
@@ -82,33 +99,16 @@ Object.setPrototypeOf(_CustomElement, HTMLElement);
 var requests = new WeakMap();
 var previousValues = new WeakMap();
 
-var XHRError = function (_Error) {
-  inherits(XHRError, _Error);
-
-  function XHRError(status, responseText, contentType) {
-    classCallCheck(this, XHRError);
-
-    var _this = possibleConstructorReturn(this, (XHRError.__proto__ || Object.getPrototypeOf(XHRError)).call(this));
-
-    _this.status = status;
-    _this.responseText = responseText;
-    _this.contentType = contentType;
-    return _this;
-  }
-
-  return XHRError;
-}(Error);
-
 var AutoCheckElement = function (_CustomElement2) {
   inherits(AutoCheckElement, _CustomElement2);
 
   function AutoCheckElement() {
     classCallCheck(this, AutoCheckElement);
 
-    var _this2 = possibleConstructorReturn(this, (AutoCheckElement.__proto__ || Object.getPrototypeOf(AutoCheckElement)).call(this));
+    var _this = possibleConstructorReturn(this, (AutoCheckElement.__proto__ || Object.getPrototypeOf(AutoCheckElement)).call(this));
 
-    _this2.boundCheck = debounce(_this2.check.bind(_this2), 300);
-    return _this2;
+    _this.boundCheck = debounce(_this.check.bind(_this), 300);
+    return _this;
   }
 
   createClass(AutoCheckElement, [{
@@ -194,6 +194,7 @@ var AutoCheckElement = function (_CustomElement2) {
   return AutoCheckElement;
 }(_CustomElement);
 
+
 function errorMessage(error) {
   if (error.status === 422 && error.responseText) {
     if (error.contentType.includes('text/html; fragment')) {
@@ -240,3 +241,5 @@ if (!window.customElements.get('auto-check')) {
   window.AutoCheckElement = AutoCheckElement;
   window.customElements.define('auto-check', AutoCheckElement);
 }
+
+export default AutoCheckElement;
