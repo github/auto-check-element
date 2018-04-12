@@ -1,4 +1,4 @@
-import {addThrottledInputEventListener, removeThrottledInputEventListener} from './throttled-input'
+import debounce from './debounce'
 
 const requests = new WeakMap()
 const previousValues = new WeakMap()
@@ -15,7 +15,7 @@ class XHRError extends Error {
 class AutoCheckElement extends HTMLElement {
   constructor() {
     super()
-    this.boundCheck = this.check.bind(this)
+    this.boundCheck = debounce(this.check.bind(this), 300)
   }
 
   connectedCallback() {
@@ -23,14 +23,14 @@ class AutoCheckElement extends HTMLElement {
     if (input instanceof HTMLInputElement) {
       this.input = input
       this.input.addEventListener('change', this.boundCheck)
-      addThrottledInputEventListener(this.input, this.boundCheck, {wait: 300})
+      this.input.addEventListener('input', this.boundCheck)
     }
   }
 
   disconnectedCallback() {
     if (this.input) {
       this.input.removeEventListener('change', this.boundCheck)
-      removeThrottledInputEventListener(this.input, this.boundCheck)
+      this.input.addEventListener('input', this.boundCheck)
     }
   }
 

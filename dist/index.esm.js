@@ -1,81 +1,18 @@
-// Throttled Input event
-//
-// Delays firing `input` event until user is done typing.
-//
-// Details
-//
-// * Never fires while a key is down, waits for the next keyup.
-//     NOTE: Native OSX text fields won't repeat keys. FF will repeat key while
-//           held down.
-// * Never fires for selection changes
-//     (pressing left or right keys to move the cursor)
-//
-
-var throttledInputEvents = new WeakMap();
-
-function schedule(element) {
-  var events = throttledInputEvents.get(element);
-  if (events.timer != null) clearTimeout(events.timer);
-
-  events.timer = setTimeout(function () {
-    if (events.timer != null) events.timer = null;
-    events.inputed = false;
-    events.listener.call(null, element);
-  }, events.wait);
-}
-
-function onKeydownInput(event) {
-  var events = throttledInputEvents.get(event.currentTarget);
-  events.keypressed = true;
-  if (events.timer != null) {
-    clearTimeout(events.timer);
-  }
-}
-
-function onKeyupInput(event) {
-  var events = throttledInputEvents.get(event.currentTarget);
-  events.keypressed = false;
-  if (events.inputed) {
-    schedule(event.currentTarget);
-  }
-}
-
-function onInputInput(event) {
-  var events = throttledInputEvents.get(event.currentTarget);
-  events.inputed = true;
-  if (!events.keypressed) {
-    schedule(event.currentTarget);
-  }
-}
-
-function addThrottledInputEventListener(target, listener) {
-  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-  throttledInputEvents.set(target, {
-    keypressed: false,
-    inputed: false,
-    timer: undefined,
-    listener: listener,
-    wait: options.wait != null ? options.wait : 100
-  });
-
-  target.addEventListener('keydown', onKeydownInput);
-  target.addEventListener('keyup', onKeyupInput);
-  target.addEventListener('input', onInputInput);
-}
-
-function removeThrottledInputEventListener(target, listener) {
-  target.removeEventListener('keydown', onKeydownInput);
-  target.removeEventListener('keyup', onKeyupInput);
-  target.removeEventListener('input', onInputInput);
-
-  var events = throttledInputEvents.get(target);
-  if (events) {
-    if (events.timer != null && events.listener === listener) {
-      clearTimeout(events.timer);
+function debounce(callback, wait) {
+  var timeout = void 0;
+  return function debounced() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
-    throttledInputEvents.delete(target);
-  }
+
+    var self = this;
+    function later() {
+      clearTimeout(timeout);
+      callback.apply(self, args);
+    }
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
 }
 
 var classCallCheck = function (instance, Constructor) {
@@ -162,25 +99,6 @@ var XHRError = function (_Error) {
   return XHRError;
 }(Error);
 
-/*
- * Enhancement to a input element that validates the input against
- * a endpoint. Provide a URL and a CSRF token and the autocheck
- * component will show validation confirmations and validation errors.
- *
- * The endpoint should return:
- *  - a 200 HTTP status code if the provided value if valid.
- *  - a 422 HTTP status code if the provided value is invalid.
- *  - a optional error message in the body and a `Content-Type` header
- *    with a value of `text/html; fragment`.
- *
- * <auto-check src='/signup_check/username' csrf="<%= authenticity_token_for("/signup_check/username") %>">
- *  <input></input>
- * </auto-check>
- *
- * The component will attach event listeners to the first input child element.
- */
-
-
 var AutoCheckElement = function (_CustomElement2) {
   inherits(AutoCheckElement, _CustomElement2);
 
@@ -189,7 +107,7 @@ var AutoCheckElement = function (_CustomElement2) {
 
     var _this2 = possibleConstructorReturn(this, (AutoCheckElement.__proto__ || Object.getPrototypeOf(AutoCheckElement)).call(this));
 
-    _this2.boundCheck = _this2.check.bind(_this2);
+    _this2.boundCheck = debounce(_this2.check.bind(_this2), 300);
     return _this2;
   }
 
@@ -200,7 +118,7 @@ var AutoCheckElement = function (_CustomElement2) {
       if (input instanceof HTMLInputElement) {
         this.input = input;
         this.input.addEventListener('change', this.boundCheck);
-        addThrottledInputEventListener(this.input, this.boundCheck, { wait: 300 });
+        this.input.addEventListener('input', this.boundCheck);
       }
     }
   }, {
@@ -208,7 +126,7 @@ var AutoCheckElement = function (_CustomElement2) {
     value: function disconnectedCallback() {
       if (this.input) {
         this.input.removeEventListener('change', this.boundCheck);
-        removeThrottledInputEventListener(this.input, this.boundCheck);
+        this.input.addEventListener('input', this.boundCheck);
       }
     }
   }, {
