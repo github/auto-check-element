@@ -1,18 +1,15 @@
+/* @flow */
+
 import debounce from './debounce'
+import XHRError from './xhr-error'
 
 const requests = new WeakMap()
 const previousValues = new WeakMap()
 
-class XHRError extends Error {
-  constructor(status, responseText, contentType) {
-    super()
-    this.status = status
-    this.responseText = responseText
-    this.contentType = contentType
-  }
-}
+export default class AutoCheckElement extends HTMLElement {
+  boundCheck: () => {}
+  input: HTMLInputElement
 
-class AutoCheckElement extends HTMLElement {
   constructor() {
     super()
     this.boundCheck = debounce(this.check.bind(this), 300)
@@ -34,7 +31,7 @@ class AutoCheckElement extends HTMLElement {
     }
   }
 
-  get src() {
+  get src(): string {
     const src = this.getAttribute('src')
     if (!src) return ''
 
@@ -43,15 +40,15 @@ class AutoCheckElement extends HTMLElement {
     return link.href
   }
 
-  set src(value) {
+  set src(value: string) {
     this.setAttribute('src', value)
   }
 
-  get csrf() {
+  get csrf(): string {
     return this.getAttribute('csrf') || ''
   }
 
-  set csrf(value) {
+  set csrf(value: string) {
     this.setAttribute('csrf', value)
   }
 

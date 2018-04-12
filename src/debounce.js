@@ -1,4 +1,6 @@
-export default function debounce(callback, wait) {
+/* @flow */
+
+export default function debounce(callback: Function, wait: number): Function {
   let timeout
   return function debounced(...args) {
     const self = this
