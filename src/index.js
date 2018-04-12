@@ -96,8 +96,8 @@ export default class AutoCheckElement extends HTMLElement {
   }
 }
 
-function errorMessage(error) {
-  if (error.status === 422 && error.responseText) {
+function errorMessage(error: XHRError) {
+  if (error.statusCode === 422 && error.responseText) {
     if (error.contentType.includes('text/html; fragment')) {
       return error.responseText
     }

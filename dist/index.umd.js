@@ -202,7 +202,7 @@ var AutoCheckElement = function (_CustomElement2) {
 
 
 function errorMessage(error) {
-  if (error.status === 422 && error.responseText) {
+  if (error.statusCode === 422 && error.responseText) {
     if (error.contentType.includes('text/html; fragment')) {
       return error.responseText;
     }
