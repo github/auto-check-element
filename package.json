@@ -9,7 +9,9 @@
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",
   "scripts": {
+    "clean": "rm -rf dist/",
     "lint": "eslint src/ && flow check",
+    "prebuild": "npm run clean",
     "build": "rollup -c",
     "pretest": "npm run build",
     "test": "karma start test/karma.config.js",
