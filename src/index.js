@@ -119,7 +119,6 @@ function performCheck(input, body, url) {
   xhr.open('POST', url, true)
   xhr.setRequestHeader('Accept', 'text/html; fragment')
   const result = send(xhr, body)
-  /* eslint-disable-next-line github/no-then */
   result.then(clear, clear)
   return result
 }
