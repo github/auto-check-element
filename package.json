@@ -8,11 +8,10 @@
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",
   "scripts": {
-    "clean": "rm -rf dist",
     "lint": "eslint src/ && flow check",
     "build": "rollup -c && rollup -c rollup.config.umd.js",
     "test": "npm run lint",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && gh-pages"
   },
   "repository": {
     "type": "git",
@@ -36,6 +35,7 @@
     "babel-preset-es2015-rollup": "^3.0.0",
     "eslint": "^4.18.1",
     "eslint-plugin-github": "^0.23.0",
+    "gh-pages": "^1.1.0",
     "rollup": "^0.56.3",
     "rollup-plugin-babel": "^3.0.3"
   },

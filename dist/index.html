@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <title>&lt;auto-check&gt; element</title>
+
+    <script src="index.umd.js" defer></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const autoCheck = document.querySelector('auto-check')
+        autoCheck.addEventListener('autocheck:send', () => console.log('loading'))
+        autoCheck.addEventListener('autocheck:complete', () => console.log('complete'))
+        autoCheck.addEventListener('autocheck:success', () => console.log('success'))
+        autoCheck.addEventListener('autocheck:error', () => console.log('error'))
+      })
+    </script>
+  </head>
+  <body>
+    <auto-check csrf="foo" src="https://dummy-cors-server.herokuapp.com/">
+      <input />
+    </auto-check>
+  </body>
+</html>
