@@ -1,7 +1,8 @@
 {
   "name": "auto-check-element",
-  "version": "1.0.0",
-  "description": "A input element that checks a endpoint to see if the value entered is valid",
+  "version": "0.0.1",
+  "description": "An input element that verifies its value with a server endpoint.",
+  "repository": "github/auto-check-element",
   "files": [
     "dist"
   ],
@@ -14,22 +15,13 @@
     "test": "karma start test/karma.config.js",
     "prepublishOnly": "npm run build && gh-pages"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/koddsson/auto-check-element.git"
-  },
   "keywords": [
     "custom element",
     "web component",
     "auto-check",
     "input"
   ],
-  "author": "Kristján Oddsson",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/koddsson/auto-check-element/issues"
-  },
-  "homepage": "https://github.com/koddsson/auto-check-element#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-custom-element-classes": "^0.1.0",
