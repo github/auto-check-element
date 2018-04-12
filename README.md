@@ -1,6 +1,6 @@
 # &lt;auto-check&gt; element
 
-Input element that validates the value provided against a endpoint.
+An input element that validates its value against a server endpoint.
 
 ## Installation
 
@@ -40,7 +40,8 @@ The endpoint should return:
 Clone this repository and run the following to install the dependencies and run the tests.
 
 ```
-npm it
+npm install
+npm test
 ```
 
 ## License

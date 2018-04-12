@@ -1,22 +1,21 @@
 {
   "name": "auto-check-element",
-  "version": "1.0.0",
-  "description": "A input element that checks a endpoint to see if the value entered is valid",
+  "version": "0.0.1",
+  "description": "An input element that validates its value with a server endpoint.",
+  "repository": "github/auto-check-element",
   "files": [
     "dist"
   ],
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",
   "scripts": {
-    "lint": "eslint src/ && flow check",
+    "clean": "rm -rf dist/",
+    "lint": "eslint src/ test/ && flow check",
+    "prebuild": "npm run clean && npm run lint",
     "build": "rollup -c",
     "pretest": "npm run build",
     "test": "karma start test/karma.config.js",
     "prepublishOnly": "npm run build && gh-pages"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/koddsson/auto-check-element.git"
   },
   "keywords": [
     "custom element",
@@ -24,20 +23,15 @@
     "auto-check",
     "input"
   ],
-  "author": "Kristján Oddsson",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/koddsson/auto-check-element/issues"
-  },
-  "homepage": "https://github.com/koddsson/auto-check-element#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-preset-es2015-rollup": "^3.0.0",
     "babel-preset-flow": "^6.23.0",
     "chai": "^4.1.2",
-    "eslint": "^4.18.1",
-    "eslint-plugin-github": "^0.23.0",
+    "eslint": "^4.19.1",
+    "eslint-plugin-github": "^0.24.1",
     "flow-bin": "^0.69.0",
     "gh-pages": "^1.1.0",
     "karma": "^2.0.0",
@@ -46,7 +40,7 @@
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
     "mocha": "^5.0.5",
-    "rollup": "^0.56.3",
+    "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.3"
   }
 }
