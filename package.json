@@ -15,7 +15,7 @@
     "build": "rollup -c",
     "pretest": "npm run build",
     "test": "karma start test/karma.config.js",
-    "prepublishOnly": "npm run build && gh-pages"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "custom element",
