@@ -40,7 +40,8 @@ The endpoint should return:
 Clone this repository and run the following to install the dependencies and run the tests.
 
 ```
-npm it
+npm install
+npm test
 ```
 
 ## License
