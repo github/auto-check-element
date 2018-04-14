@@ -52,7 +52,7 @@ export default class AutoCheckElement extends HTMLElement {
     this.setAttribute('csrf', value)
   }
 
-  async check() {
+  check() {
     if (!this.src) {
       throw new Error('missing src')
     }
@@ -75,24 +75,36 @@ export default class AutoCheckElement extends HTMLElement {
       return
     }
 
-    try {
-      this.dispatchEvent(new CustomEvent('loadstart'))
-      const data = await performCheck(this.input, body, this.src)
-      this.dispatchEvent(new CustomEvent('load'))
-
-      const warning = data ? data.trim() : null
-      this.input.dispatchEvent(
-        new CustomEvent('autocheck:success', {detail: {warning}, bubbles: true, cancelable: true})
-      )
-    } catch (error) {
-      this.dispatchEvent(new CustomEvent('error'))
-      this.input.dispatchEvent(
-        new CustomEvent('autocheck:error', {detail: {message: errorMessage(error)}, bubbles: true, cancelable: true})
-      )
-    } finally {
+    const always = () => {
       this.dispatchEvent(new CustomEvent('loadend'))
       this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true, cancelable: true}))
     }
+
+    this.dispatchEvent(new CustomEvent('loadstart'))
+    performCheck(this.input, body, this.src)
+      .then(data => {
+        this.dispatchEvent(new CustomEvent('load'))
+
+        const warning = data ? data.trim() : null
+        this.input.dispatchEvent(
+          new CustomEvent('autocheck:success', {
+            detail: {warning},
+            bubbles: true,
+            cancelable: true
+          })
+        )
+      })
+      .catch(error => {
+        this.dispatchEvent(new CustomEvent('error'))
+        this.input.dispatchEvent(
+          new CustomEvent('autocheck:error', {
+            detail: {message: errorMessage(error)},
+            bubbles: true,
+            cancelable: true
+          })
+        )
+      })
+      .then(always, always)
   }
 }
 
