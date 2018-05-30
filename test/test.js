@@ -99,5 +99,23 @@ describe('auto-check element', function() {
         done()
       })
     })
+
+    it('emits a send event before checking if there is a duplicate request', function(done) {
+      const autoCheckElement = document.querySelector('auto-check')
+      const input = autoCheckElement.querySelector('input')
+
+      let counter = 2
+      input.addEventListener('autocheck:send', () => {
+        if (counter === 2) {
+          done()
+        } else {
+          counter += 1
+        }
+      })
+
+      input.value = 'hub'
+      autoCheckElement.check()
+      autoCheckElement.check()
+    })
   })
 })
