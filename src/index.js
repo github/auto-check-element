@@ -64,11 +64,11 @@ export default class AutoCheckElement extends HTMLElement {
     body.append('authenticity_token', this.csrf) // eslint-disable-line github/authenticity-token
     body.append('value', this.input.value)
 
-    this.input.dispatchEvent(new CustomEvent('autocheck:send', {detail: {body}, bubbles: true, cancelable: true}))
-
     const id = body.entries ? [...body.entries()].sort().toString() : null
     if (id && id === previousValues.get(this.input)) return
     previousValues.set(this.input, id)
+
+    this.input.dispatchEvent(new CustomEvent('autocheck:send', {detail: {body}, bubbles: true, cancelable: true}))
 
     if (!this.input.value.trim()) {
       this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true, cancelable: true}))
