@@ -106,6 +106,19 @@ describe('auto-check element', function() {
       assert.isFalse(document.querySelector('form').checkValidity())
     })
 
+    it('sets form as invalid if the check request comes back with a error', function(done) {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.required = true
+      autoCheck.src = '/fail'
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('change'))
+      input.addEventListener('autocheck:complete', () => {
+        assert.isFalse(document.querySelector('form').checkValidity())
+        done()
+      })
+    })
+
     it('emits a complete event at the end of the lifecycle', function(done) {
       const input = document.querySelector('input')
       input.value = 'hub'
