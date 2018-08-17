@@ -52,6 +52,14 @@ export default class AutoCheckElement extends HTMLElement {
     this.setAttribute('csrf', value)
   }
 
+  get required(): boolean {
+    return this.hasAttribute('required')
+  }
+
+  set required(required: boolean) {
+    this.input.required = required
+  }
+
   check() {
     if (!this.src) {
       throw new Error('missing src')
