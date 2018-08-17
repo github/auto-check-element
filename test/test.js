@@ -9,6 +9,12 @@ describe('auto-check element', function() {
       const el = new window.AutoCheckElement()
       assert.equal('AUTO-CHECK', el.nodeName)
     })
+
+    it('has the correct attributes', function() {
+      const el = document.createElement('auto-check')
+      assert.equal(el.getAttribute('autocomplete', 'off'))
+      assert.equal(el.getAttribute('spellcheck', 'false'))
+    })
   })
 
   describe('requesting server results', function() {

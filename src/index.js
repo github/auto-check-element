@@ -21,6 +21,8 @@ export default class AutoCheckElement extends HTMLElement {
       this.input = input
       this.input.addEventListener('change', this.boundCheck)
       this.input.addEventListener('input', this.boundCheck)
+      this.input.autocomplete = 'off'
+      this.input.spellcheck = false
       if (this.hasAttribute('required')) {
         this.input.setCustomValidity('auto-check-loading')
       }
