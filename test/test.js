@@ -15,11 +15,9 @@ describe('auto-check element', function() {
     beforeEach(function() {
       const container = document.createElement('div')
       container.innerHTML = `
-        <form>
-          <auto-check csrf="foo" src="/success">
-            <input />
-          </auto-check>
-        </form>`
+        <auto-check csrf="foo" src="/success">
+          <input />
+        </auto-check>`
       document.body.append(container)
     })
 
@@ -93,20 +91,20 @@ describe('auto-check element', function() {
       })
     })
 
-    it('sets form as invalid if input is required and not filled in', function() {
+    it('sets input as invalid if input is required and not filled in', function() {
       document.querySelector('auto-check').required = true
-      assert.isFalse(document.querySelector('form').checkValidity())
+      assert.isFalse(document.querySelector('input').checkValidity())
     })
 
-    it('sets form as invalid while the check request is inflight', function() {
+    it('sets input as invalid while the check request is inflight', function() {
       document.querySelector('auto-check').required = true
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      assert.isFalse(document.querySelector('form').checkValidity())
+      assert.isFalse(document.querySelector('input').checkValidity())
     })
 
-    it('sets form as invalid if the check request comes back with a error', function(done) {
+    it('sets input as invalid if the check request comes back with a error', function(done) {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       autoCheck.src = '/fail'
@@ -114,32 +112,32 @@ describe('auto-check element', function() {
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
       input.addEventListener('autocheck:complete', () => {
-        assert.isFalse(document.querySelector('form').checkValidity())
+        assert.isFalse(document.querySelector('input').checkValidity())
         done()
       })
     })
 
-    it('sets form as valid if the check request comes back with a success', function(done) {
+    it('sets input as valid if the check request comes back with a success', function(done) {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
       input.addEventListener('autocheck:complete', () => {
-        assert.isTrue(document.querySelector('form').checkValidity())
+        assert.isTrue(document.querySelector('input').checkValidity())
         done()
       })
     })
 
-    it("doesn't set form as invalid the `required` attribute isn't set", function(done) {
+    it("doesn't set input as invalid the `required` attribute isn't set", function(done) {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.src = '/fail'
       const input = document.querySelector('input')
       input.value = 'hub'
-      assert.isTrue(document.querySelector('form').checkValidity())
+      assert.isTrue(document.querySelector('input').checkValidity())
       input.dispatchEvent(new InputEvent('change'))
       input.addEventListener('autocheck:complete', () => {
-        assert.isTrue(document.querySelector('form').checkValidity())
+        assert.isTrue(document.querySelector('input').checkValidity())
         done()
       })
     })
