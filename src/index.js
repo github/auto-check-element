@@ -21,6 +21,9 @@ export default class AutoCheckElement extends HTMLElement {
       this.input = input
       this.input.addEventListener('change', this.boundCheck)
       this.input.addEventListener('input', this.boundCheck)
+      if (this.hasAttribute('required')) {
+        this.input.setCustomValidity('auto-check-loading')
+      }
     }
   }
 
@@ -28,6 +31,7 @@ export default class AutoCheckElement extends HTMLElement {
     if (this.input) {
       this.input.removeEventListener('change', this.boundCheck)
       this.input.addEventListener('input', this.boundCheck)
+      this.input.setCustomValidity('')
     }
   }
 
@@ -58,6 +62,11 @@ export default class AutoCheckElement extends HTMLElement {
 
   set required(required: boolean) {
     this.input.required = required
+    if (required) {
+      this.input.setCustomValidity('auto-check-loading')
+    } else {
+      this.input.setCustomValidity('')
+    }
   }
 
   check() {
@@ -94,6 +103,7 @@ export default class AutoCheckElement extends HTMLElement {
         this.dispatchEvent(new CustomEvent('load'))
 
         const warning = data ? data.trim() : null
+        this.input.setCustomValidity('')
         this.input.dispatchEvent(
           new CustomEvent('autocheck:success', {
             detail: {warning},
