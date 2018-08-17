@@ -93,9 +93,8 @@ describe('auto-check element', function() {
       })
     })
 
-    it('sets form as invalid if the results are error', function() {
-      const autoCheck = document.querySelector('auto-check')
-      autoCheck.required = true
+    it('sets form as invalid if input is required and not filled in', function() {
+      document.querySelector('auto-check').required = true
       assert.isFalse(document.querySelector('form').checkValidity())
     })
 
