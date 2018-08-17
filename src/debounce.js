@@ -1,5 +1,6 @@
 /* @flow */
 
+// eslint-disable-next-line flowtype/no-weak-types
 export default function debounce(callback: Function, wait: number): Function {
   let timeout
   return function debounced(...args) {
