@@ -15,9 +15,11 @@ describe('auto-check element', function() {
     beforeEach(function() {
       const container = document.createElement('div')
       container.innerHTML = `
-        <auto-check csrf="foo" src="/success">
-          <input />
-        </auto-check>`
+        <form>
+          <auto-check csrf="foo" src="/success">
+            <input />
+          </auto-check>
+        </form>`
       document.body.append(container)
     })
 
@@ -89,6 +91,12 @@ describe('auto-check element', function() {
       }).then(result => {
         assert.equal('This is a error', result)
       })
+    })
+
+    it('sets form as invalid if the results are error', function() {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.required = true
+      assert.isFalse(document.querySelector('form').checkValidity())
     })
 
     it('emits a complete event at the end of the lifecycle', function(done) {
