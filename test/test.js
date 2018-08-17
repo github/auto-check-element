@@ -98,6 +98,14 @@ describe('auto-check element', function() {
       assert.isFalse(document.querySelector('form').checkValidity())
     })
 
+    it('sets form as invalid while the check request is inflight', function() {
+      document.querySelector('auto-check').required = true
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('change'))
+      assert.isFalse(document.querySelector('form').checkValidity())
+    })
+
     it('emits a complete event at the end of the lifecycle', function(done) {
       const input = document.querySelector('input')
       input.value = 'hub'
