@@ -131,6 +131,19 @@ describe('auto-check element', function() {
       })
     })
 
+    it("doesn't set form as invalid the `required` attribute isn't set", function(done) {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.src = '/fail'
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      assert.isTrue(document.querySelector('form').checkValidity())
+      input.dispatchEvent(new InputEvent('change'))
+      input.addEventListener('autocheck:complete', () => {
+        assert.isTrue(document.querySelector('form').checkValidity())
+        done()
+      })
+    })
+
     it('emits a complete event at the end of the lifecycle', function(done) {
       const input = document.querySelector('input')
       input.value = 'hub'
