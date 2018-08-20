@@ -27,17 +27,60 @@ The endpoint should respond to POST requests with:
  - a 422 HTTP status code if the provided value is invalid.
  - a optional error message in the body and a `Content-Type` header with a value of `text/html; fragment`.
 
+## Events
+
+```js
+const check = document.querySelector('auto-check')
+
+// Network request lifecycle events.
+check.addEventListener('loadstart', function(event) {
+  console.log('Network request started', event)
+})
+check.addEventListener('loadend', function(event) {
+  console.log('Network request complete', event)
+})
+check.addEventListener('load', function(event) {
+  console.log('Network request succeeded', event)
+})
+check.addEventListener('error', function(event) {
+  console.log('Network request failed', event)
+})
+
+// Auto-check result events.
+const input = check.querySelector('input')
+
+input.addEventListener('autocheck:send', function(event) {
+  console.log('Adding to FormData before network request is sent.')
+  const {body} = event.detail
+  body.append('custom_form_data', 'value')
+})
+input.addEventListener('autocheck:success', function(event) {
+  const {message} = event.detail
+  console.log('Validation passed', message)
+})
+input.addEventListener('autocheck:error', function(event) {
+  const {message} = event.detail
+  console.log('Validation failed', message)
+})
+input.addEventListener('autocheck:complete', function(event) {
+  console.log('Validation complete', event)
+})
+```
+
 ## Browser support
+
+Browsers without native [custom element support][support] require a [polyfill][].
 
 - Chrome
 - Firefox
-- Safari 9+
+- Safari
 - Internet Explorer 11
 - Microsoft Edge
 
-## Development
+[support]: https://caniuse.com/#feat=custom-elementsv1
+[polyfill]: https://github.com/webcomponents/custom-elements
 
-Clone this repository and run the following to install the dependencies and run the tests.
+## Development
 
 ```
 npm install
