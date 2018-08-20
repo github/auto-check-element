@@ -40,7 +40,7 @@ check.addEventListener('loadend', function(event) {
   console.log('Network request complete', event)
 })
 check.addEventListener('load', function(event) {
-  console.log('Network succces succeeded', event)
+  console.log('Network request succeeded', event)
 })
 check.addEventListener('error', function(event) {
   console.log('Network request failed', event)
