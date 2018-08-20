@@ -61,6 +61,7 @@ export default class AutoCheckElement extends HTMLElement {
 
   set required(required: boolean) {
     this.input.required = required
+    this.setAttribute('required', required.toString())
   }
 
   check() {
