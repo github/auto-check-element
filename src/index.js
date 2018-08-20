@@ -85,10 +85,10 @@ export default class AutoCheckElement extends HTMLElement {
       .then(data => {
         this.dispatchEvent(new CustomEvent('load'))
 
-        const warning = data ? data.trim() : null
+        const message = data ? data.trim() : null
         this.input.dispatchEvent(
           new CustomEvent('autocheck:success', {
-            detail: {warning},
+            detail: {message},
             bubbles: true,
             cancelable: true
           })

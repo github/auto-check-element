@@ -52,13 +52,13 @@ describe('auto-check element', function() {
       })
     })
 
-    it('emits a success event with warning when server returns a non error response', function() {
+    it('emits a success event with message when server returns a non error response', function() {
       return new Promise(resolve => {
         const input = document.querySelector('input')
         input.value = 'hub'
         input.dispatchEvent(new InputEvent('change'))
         input.addEventListener('autocheck:success', event => {
-          resolve(event.detail.warning)
+          resolve(event.detail.message)
         })
       }).then(result => {
         assert.equal('This is a warning', result)
