@@ -29,15 +29,18 @@ The endpoint should return:
 
 ## Browser support
 
+Browsers without native [custom element support][support] require a [polyfill][].
+
 - Chrome
 - Firefox
-- Safari 9+
+- Safari
 - Internet Explorer 11
 - Microsoft Edge
 
-## Development
+[support]: https://caniuse.com/#feat=custom-elementsv1
+[polyfill]: https://github.com/webcomponents/custom-elements
 
-Clone this repository and run the following to install the dependencies and run the tests.
+## Development
 
 ```
 npm install
