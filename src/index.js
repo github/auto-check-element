@@ -23,9 +23,6 @@ export default class AutoCheckElement extends HTMLElement {
       this.input.addEventListener('input', this.boundCheck)
       this.input.autocomplete = 'off'
       this.input.spellcheck = false
-      if (this.hasAttribute('required')) {
-        this.input.setCustomValidity('auto-check-loading')
-      }
     }
   }
 
@@ -64,11 +61,6 @@ export default class AutoCheckElement extends HTMLElement {
 
   set required(required: boolean) {
     this.input.required = required
-    if (required) {
-      this.input.setCustomValidity('auto-check-loading')
-    } else {
-      this.input.setCustomValidity('')
-    }
   }
 
   check() {
@@ -103,6 +95,9 @@ export default class AutoCheckElement extends HTMLElement {
     performCheck(this.input, body, this.src)
       .then(data => {
         this.dispatchEvent(new CustomEvent('load'))
+        if (this.required) {
+          this.input.setCustomValidity('auto-check-loading')
+        }
 
         const warning = data ? data.trim() : null
         if (this.required) {
@@ -117,6 +112,9 @@ export default class AutoCheckElement extends HTMLElement {
         )
       })
       .catch(error => {
+        if (this.required) {
+          this.input.setCustomValidity('auto-check-error')
+        }
         this.dispatchEvent(new CustomEvent('error'))
         this.input.dispatchEvent(
           new CustomEvent('autocheck:error', {
