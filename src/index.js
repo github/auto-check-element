@@ -68,16 +68,16 @@ export default class AutoCheckElement extends HTMLElement {
     if (id && id === previousValues.get(this.input)) return
     previousValues.set(this.input, id)
 
-    this.input.dispatchEvent(new CustomEvent('autocheck:send', {detail: {body}, bubbles: true, cancelable: true}))
+    this.input.dispatchEvent(new CustomEvent('autocheck:send', {detail: {body}, bubbles: true}))
 
     if (!this.input.value.trim()) {
-      this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true, cancelable: true}))
+      this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true}))
       return
     }
 
     const always = () => {
       this.dispatchEvent(new CustomEvent('loadend'))
-      this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true, cancelable: true}))
+      this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true}))
     }
 
     this.dispatchEvent(new CustomEvent('loadstart'))
@@ -86,22 +86,12 @@ export default class AutoCheckElement extends HTMLElement {
         this.dispatchEvent(new CustomEvent('load'))
 
         const message = data ? data.trim() : null
-        this.input.dispatchEvent(
-          new CustomEvent('autocheck:success', {
-            detail: {message},
-            bubbles: true,
-            cancelable: true
-          })
-        )
+        this.input.dispatchEvent(new CustomEvent('autocheck:success', {detail: {message}, bubbles: true}))
       })
       .catch(error => {
         this.dispatchEvent(new CustomEvent('error'))
         this.input.dispatchEvent(
-          new CustomEvent('autocheck:error', {
-            detail: {message: errorMessage(error)},
-            bubbles: true,
-            cancelable: true
-          })
+          new CustomEvent('autocheck:error', {detail: {message: errorMessage(error)}, bubbles: true})
         )
       })
       .then(always, always)
