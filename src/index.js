@@ -96,7 +96,7 @@ export default class AutoCheckElement extends HTMLElement {
       .then(data => {
         this.dispatchEvent(new CustomEvent('load'))
         if (this.required) {
-          this.input.setCustomValidity('auto-check-loading')
+          this.input.setCustomValidity('Verifying...')
         }
 
         const warning = data ? data.trim() : null
@@ -113,7 +113,7 @@ export default class AutoCheckElement extends HTMLElement {
       })
       .catch(error => {
         if (this.required) {
-          this.input.setCustomValidity('auto-check-error')
+          this.input.setCustomValidity(errorMessage(error) || 'Something went wrong')
         }
         this.dispatchEvent(new CustomEvent('error'))
         this.input.dispatchEvent(
