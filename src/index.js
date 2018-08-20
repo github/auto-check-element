@@ -92,14 +92,13 @@ export default class AutoCheckElement extends HTMLElement {
       this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true, cancelable: true}))
     }
 
+    if (this.required) {
+      this.input.setCustomValidity('Verifying...')
+    }
     this.dispatchEvent(new CustomEvent('loadstart'))
     performCheck(this.input, body, this.src)
       .then(data => {
         this.dispatchEvent(new CustomEvent('load'))
-        if (this.required) {
-          this.input.setCustomValidity('Verifying...')
-        }
-
         const warning = data ? data.trim() : null
         if (this.required) {
           this.input.setCustomValidity('')

@@ -107,7 +107,9 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      assert.isFalse(document.querySelector('input').checkValidity())
+      input.addEventListener('autocheck:loadstart', () => {
+        assert.isFalse(document.querySelector('input').checkValidity())
+      })
     })
 
     it('sets input as invalid if the check request comes back with a error', function(done) {
