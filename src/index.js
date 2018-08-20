@@ -32,7 +32,7 @@ export default class AutoCheckElement extends HTMLElement {
   disconnectedCallback() {
     if (this.input) {
       this.input.removeEventListener('change', this.boundCheck)
-      this.input.addEventListener('input', this.boundCheck)
+      this.input.removeEventListener('input', this.boundCheck)
       this.input.setCustomValidity('')
     }
   }
