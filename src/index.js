@@ -105,7 +105,9 @@ export default class AutoCheckElement extends HTMLElement {
         this.dispatchEvent(new CustomEvent('load'))
 
         const warning = data ? data.trim() : null
-        this.input.setCustomValidity('')
+        if (this.required) {
+          this.input.setCustomValidity('')
+        }
         this.input.dispatchEvent(
           new CustomEvent('autocheck:success', {
             detail: {warning},
