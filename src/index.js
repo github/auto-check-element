@@ -93,7 +93,7 @@ export default class AutoCheckElement extends HTMLElement {
     }
 
     if (this.required) {
-      this.input.setCustomValidity('Verifying...')
+      this.input.setCustomValidity('Verifying…')
     }
     this.dispatchEvent(new CustomEvent('loadstart'))
     performCheck(this.input, body, this.src)
