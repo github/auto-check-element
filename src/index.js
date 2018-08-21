@@ -21,13 +21,16 @@ export default class AutoCheckElement extends HTMLElement {
       this.input = input
       this.input.addEventListener('change', this.boundCheck)
       this.input.addEventListener('input', this.boundCheck)
+      this.input.autocomplete = 'off'
+      this.input.spellcheck = false
     }
   }
 
   disconnectedCallback() {
     if (this.input) {
       this.input.removeEventListener('change', this.boundCheck)
-      this.input.addEventListener('input', this.boundCheck)
+      this.input.removeEventListener('input', this.boundCheck)
+      this.input.setCustomValidity('')
     }
   }
 
@@ -50,6 +53,19 @@ export default class AutoCheckElement extends HTMLElement {
 
   set csrf(value: string) {
     this.setAttribute('csrf', value)
+  }
+
+  get required(): boolean {
+    return this.hasAttribute('required')
+  }
+
+  set required(required: boolean) {
+    this.input.required = required
+    if (required) {
+      this.setAttribute('required', '')
+    } else {
+      this.removeAttribute('required')
+    }
   }
 
   check() {
@@ -80,15 +96,23 @@ export default class AutoCheckElement extends HTMLElement {
       this.input.dispatchEvent(new CustomEvent('autocheck:complete', {bubbles: true}))
     }
 
+    if (this.required) {
+      this.input.setCustomValidity('Verifying…')
+    }
     this.dispatchEvent(new CustomEvent('loadstart'))
     performCheck(this.input, body, this.src)
       .then(data => {
         this.dispatchEvent(new CustomEvent('load'))
-
         const message = data ? data.trim() : null
+        if (this.required) {
+          this.input.setCustomValidity('')
+        }
         this.input.dispatchEvent(new CustomEvent('autocheck:success', {detail: {message}, bubbles: true}))
       })
       .catch(error => {
+        if (this.required) {
+          this.input.setCustomValidity(errorMessage(error) || 'Something went wrong')
+        }
         this.dispatchEvent(new CustomEvent('error'))
         this.input.dispatchEvent(
           new CustomEvent('autocheck:error', {detail: {message: errorMessage(error)}, bubbles: true})

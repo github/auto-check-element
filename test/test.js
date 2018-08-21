@@ -9,6 +9,12 @@ describe('auto-check element', function() {
       const el = new window.AutoCheckElement()
       assert.equal('AUTO-CHECK', el.nodeName)
     })
+
+    it('has the correct attributes', function() {
+      const el = document.createElement('auto-check')
+      assert.equal(el.getAttribute('autocomplete', 'off'))
+      assert.equal(el.getAttribute('spellcheck', 'false'))
+    })
   })
 
   describe('requesting server results', function() {
@@ -88,6 +94,59 @@ describe('auto-check element', function() {
         })
       }).then(result => {
         assert.equal('This is a error', result)
+      })
+    })
+
+    it('sets input as invalid if input is required and not filled in', function() {
+      document.querySelector('auto-check').required = true
+      assert.isFalse(document.querySelector('input').checkValidity())
+    })
+
+    it('sets input as invalid while the check request is inflight', function() {
+      document.querySelector('auto-check').required = true
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('change'))
+      input.addEventListener('autocheck:loadstart', () => {
+        assert.isFalse(document.querySelector('input').checkValidity())
+      })
+    })
+
+    it('sets input as invalid if the check request comes back with a error', function(done) {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.required = true
+      autoCheck.src = '/fail'
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('change'))
+      input.addEventListener('autocheck:complete', () => {
+        assert.isFalse(document.querySelector('input').checkValidity())
+        done()
+      })
+    })
+
+    it('sets input as valid if the check request comes back with a success', function(done) {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.required = true
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('change'))
+      input.addEventListener('autocheck:complete', () => {
+        assert.isTrue(document.querySelector('input').checkValidity())
+        done()
+      })
+    })
+
+    it("doesn't set input as invalid the `required` attribute isn't set", function(done) {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.src = '/fail'
+      const input = document.querySelector('input')
+      input.value = 'hub'
+      assert.isTrue(document.querySelector('input').checkValidity())
+      input.dispatchEvent(new InputEvent('change'))
+      input.addEventListener('autocheck:complete', () => {
+        assert.isTrue(document.querySelector('input').checkValidity())
+        done()
       })
     })
 
