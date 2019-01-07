@@ -77,7 +77,7 @@ export default class AutoCheckElement extends HTMLElement {
     }
 
     const body = new FormData()
-    body.append('authenticity_token', this.csrf) // eslint-disable-line github/authenticity-token
+    body.append('authenticity_token', this.csrf)
     body.append('value', this.input.value)
 
     const id = body.entries ? [...body.entries()].sort().toString() : null
