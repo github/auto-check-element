@@ -19,8 +19,7 @@ export default {
   ],
   plugins: [
     babel({
-      plugins: ['transform-custom-element-classes'],
-      presets: ['@babel/env', '@babel/flow']
+      presets: ['github']
     })
   ]
 }
