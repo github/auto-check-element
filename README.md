@@ -49,20 +49,20 @@ check.addEventListener('error', function(event) {
 // Auto-check result events.
 const input = check.querySelector('input')
 
-input.addEventListener('autocheck:send', function(event) {
+input.addEventListener('auto-check-send', function(event) {
   console.log('Adding to FormData before network request is sent.')
   const {body} = event.detail
   body.append('custom_form_data', 'value')
 })
-input.addEventListener('autocheck:success', function(event) {
+input.addEventListener('auto-check-success', function(event) {
   const {message} = event.detail
   console.log('Validation passed', message)
 })
-input.addEventListener('autocheck:error', function(event) {
+input.addEventListener('auto-check-error', function(event) {
   const {message} = event.detail
   console.log('Validation failed', message)
 })
-input.addEventListener('autocheck:complete', function(event) {
+input.addEventListener('auto-check-complete', function(event) {
   console.log('Validation complete', event)
 })
 ```
