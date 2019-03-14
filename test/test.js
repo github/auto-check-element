@@ -35,7 +35,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
-      input.addEventListener('autocheck:send', () => {
+      input.addEventListener('auto-check-send', () => {
         done()
       })
     })
@@ -44,7 +44,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:send', () => {
+      input.addEventListener('auto-check-send', () => {
         done()
       })
     })
@@ -53,7 +53,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:success', () => {
+      input.addEventListener('auto-check-success', () => {
         done()
       })
     })
@@ -63,7 +63,7 @@ describe('auto-check element', function() {
         const input = document.querySelector('input')
         input.value = 'hub'
         input.dispatchEvent(new InputEvent('change'))
-        input.addEventListener('autocheck:success', event => {
+        input.addEventListener('auto-check-success', event => {
           resolve(event.detail.message)
         })
       }).then(result => {
@@ -77,7 +77,7 @@ describe('auto-check element', function() {
       autoCheck.src = '/fail'
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:error', () => {
+      input.addEventListener('auto-check-error', () => {
         done()
       })
     })
@@ -89,7 +89,7 @@ describe('auto-check element', function() {
         autoCheck.src = '/fail'
         input.value = 'hub'
         input.dispatchEvent(new InputEvent('change'))
-        input.addEventListener('autocheck:error', () => {
+        input.addEventListener('auto-check-error', () => {
           resolve(event.detail.message)
         })
       }).then(result => {
@@ -107,7 +107,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:loadstart', () => {
+      input.addEventListener('auto-check-loadstart', () => {
         assert.isFalse(document.querySelector('input').checkValidity())
       })
     })
@@ -119,7 +119,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:complete', () => {
+      input.addEventListener('auto-check-complete', () => {
         assert.isFalse(document.querySelector('input').checkValidity())
         done()
       })
@@ -131,7 +131,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:complete', () => {
+      input.addEventListener('auto-check-complete', () => {
         assert.isTrue(document.querySelector('input').checkValidity())
         done()
       })
@@ -144,7 +144,7 @@ describe('auto-check element', function() {
       input.value = 'hub'
       assert.isTrue(document.querySelector('input').checkValidity())
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:complete', () => {
+      input.addEventListener('auto-check-complete', () => {
         assert.isTrue(document.querySelector('input').checkValidity())
         done()
       })
@@ -154,7 +154,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('autocheck:complete', () => {
+      input.addEventListener('auto-check-complete', () => {
         done()
       })
     })
@@ -164,7 +164,7 @@ describe('auto-check element', function() {
       const input = autoCheckElement.querySelector('input')
 
       let counter = 2
-      input.addEventListener('autocheck:send', () => {
+      input.addEventListener('auto-check-send', () => {
         if (counter === 2) {
           done()
         } else {

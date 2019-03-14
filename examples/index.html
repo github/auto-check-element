@@ -7,10 +7,10 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const autoCheck = document.querySelector('auto-check')
-        autoCheck.addEventListener('autocheck:send', () => console.log('loading'))
-        autoCheck.addEventListener('autocheck:complete', () => console.log('complete'))
-        autoCheck.addEventListener('autocheck:success', () => console.log('success'))
-        autoCheck.addEventListener('autocheck:error', () => console.log('error'))
+        autoCheck.addEventListener('auto-check-send', () => console.log('loading'))
+        autoCheck.addEventListener('auto-check-complete', () => console.log('complete'))
+        autoCheck.addEventListener('auto-check-success', () => console.log('success'))
+        autoCheck.addEventListener('auto-check-error', () => console.log('error'))
       })
     </script>
   </head>
