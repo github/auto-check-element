@@ -2,21 +2,55 @@
 <html>
   <head>
     <title>&lt;auto-check&gt; element</title>
-
-    <script src="index.umd.js" defer></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const autoCheck = document.querySelector('auto-check')
-        autoCheck.addEventListener('auto-check-send', () => console.log('loading'))
-        autoCheck.addEventListener('auto-check-complete', () => console.log('complete'))
-        autoCheck.addEventListener('auto-check-success', () => console.log('success'))
-        autoCheck.addEventListener('auto-check-error', () => console.log('error'))
-      })
-    </script>
   </head>
   <body>
-    <auto-check csrf="foo" src="https://dummy-cors-server.herokuapp.com/">
-      <input />
-    </auto-check>
+    <form>
+      <p>Input 422 for an error response.</p>
+      <auto-check csrf="foo" src="/demo">
+        <input autofocus name="foo">
+        <code id="state"></code>
+      </auto-check>
+      <button disabled>submit</button>
+    </form>
+
+    <script>
+      const input = document.querySelector('input')
+      const button = document.querySelector('button')
+      class FakeXMLHttpRequest {
+        abort() {
+          // Do nothing.
+        }
+        open(method, url) {
+          // Do nothing.
+        }
+        setRequestHeader(name, value) {
+          // Do nothing.
+        }
+        getResponseHeader(name, value) {
+          // Do nothing.
+        }
+        send() {
+          this.status = input.value === '422' ? 422 : 200
+          setTimeout(this.onload.bind(this), 0)
+        }
+      }
+      window.XMLHttpRequest = FakeXMLHttpRequest
+      const state = document.getElementById('state')
+      document.addEventListener('auto-check-send', () => {
+        state.textContent = 'loading'
+        button.disabled = true
+      })
+      document.addEventListener('auto-check-success', () => {
+        state.textContent = 'success'
+        button.disabled = false
+      })
+      document.addEventListener('auto-check-error', () => {
+        state.textContent = 'error'
+        button.disabled = true
+      })
+    </script>
+
+    <script src="https://unpkg.com/auto-check-element@latest/dist/index.umd.js"></script>
+    <!-- <script src="../dist/index.umd.js" defer></script> -->
   </body>
 </html>
