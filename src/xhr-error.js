@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 export default class XHRError extends Error {
   statusCode: number

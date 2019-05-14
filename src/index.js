@@ -1,4 +1,4 @@
-/* @flow */
+/* @flow strict */
 
 import debounce from './debounce'
 import XHRError from './xhr-error'
@@ -7,7 +7,7 @@ const requests = new WeakMap()
 const previousValues = new WeakMap()
 
 export default class AutoCheckElement extends HTMLElement {
-  boundCheck: () => {}
+  boundCheck: () => void
   input: HTMLInputElement
 
   constructor() {
