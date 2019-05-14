@@ -76,7 +76,7 @@ export default class AutoCheckElement extends HTMLElement {
   }
 }
 
-function check(autoCheckElement) {
+function check(autoCheckElement: AutoCheckElement) {
   if (!autoCheckElement.src) {
     throw new Error('missing src')
   }
@@ -129,7 +129,7 @@ function check(autoCheckElement) {
     .then(always, always)
 }
 
-function errorMessage(error: XHRError) {
+function errorMessage(error: XHRError): ?string {
   if (error.statusCode === 422 && error.responseText) {
     if (error.contentType.includes('text/html; fragment')) {
       return error.responseText
@@ -137,7 +137,7 @@ function errorMessage(error: XHRError) {
   }
 }
 
-function performCheck(input, body, url) {
+function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
   const pending = requests.get(input)
   if (pending) pending.abort()
 
@@ -153,7 +153,7 @@ function performCheck(input, body, url) {
   return result
 }
 
-function send(xhr, body) {
+function send(xhr: XMLHttpRequest, body: FormData): Promise<string> {
   return new Promise((resolve, reject) => {
     xhr.onload = function() {
       if (xhr.status >= 200 && xhr.status < 300) {
