@@ -9,30 +9,33 @@ const previousValues = new WeakMap()
 let boundCheck
 
 export default class AutoCheckElement extends HTMLElement {
-  input: HTMLInputElement
-
   constructor() {
     super()
     boundCheck = debounce(check.bind(null, this), 300)
   }
 
   connectedCallback() {
-    const input = this.querySelector('input')
-    if (input instanceof HTMLInputElement) {
-      this.input = input
-      this.input.addEventListener('change', boundCheck)
-      this.input.addEventListener('input', boundCheck)
-      this.input.autocomplete = 'off'
-      this.input.spellcheck = false
-    }
+    const input = this.input
+    if (!input) return
+
+    input.addEventListener('change', boundCheck)
+    input.addEventListener('input', boundCheck)
+    input.autocomplete = 'off'
+    input.spellcheck = false
   }
 
   disconnectedCallback() {
-    if (this.input) {
-      this.input.removeEventListener('change', boundCheck)
-      this.input.removeEventListener('input', boundCheck)
-      this.input.setCustomValidity('')
-    }
+    const input = this.input
+    if (!input) return
+
+    input.removeEventListener('change', boundCheck)
+    input.removeEventListener('input', boundCheck)
+    input.setCustomValidity('')
+  }
+
+  get input(): ?HTMLInputElement {
+    const input = this.querySelector('input')
+    return input instanceof HTMLInputElement ? input : null
   }
 
   get src(): string {
@@ -61,7 +64,10 @@ export default class AutoCheckElement extends HTMLElement {
   }
 
   set required(required: boolean) {
-    this.input.required = required
+    const input = this.input
+    if (!input) return
+
+    input.required = required
     if (required) {
       this.setAttribute('required', '')
     } else {
@@ -77,48 +83,48 @@ function check(autoCheckElement) {
   if (!autoCheckElement.csrf) {
     throw new Error('missing csrf')
   }
+  const input = autoCheckElement.input
+  if (!input) return
 
   const body = new FormData()
   body.append('authenticity_token', autoCheckElement.csrf)
-  body.append('value', autoCheckElement.input.value)
+  body.append('value', input.value)
 
   const id = body.entries ? [...body.entries()].sort().toString() : null
-  if (id && id === previousValues.get(autoCheckElement.input)) return
-  previousValues.set(autoCheckElement.input, id)
+  if (id && id === previousValues.get(input)) return
+  previousValues.set(input, id)
 
-  autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-send', {detail: {body}, bubbles: true}))
+  input.dispatchEvent(new CustomEvent('auto-check-send', {detail: {body}, bubbles: true}))
 
-  if (!autoCheckElement.input.value.trim()) {
-    autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+  if (!input.value.trim()) {
+    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
 
   const always = () => {
     autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
-    autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   }
 
   if (autoCheckElement.required) {
-    autoCheckElement.input.setCustomValidity('Verifying…')
+    input.setCustomValidity('Verifying…')
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
-  performCheck(autoCheckElement.input, body, autoCheckElement.src)
+  performCheck(input, body, autoCheckElement.src)
     .then(data => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
       const message = data ? data.trim() : null
       if (autoCheckElement.required) {
-        autoCheckElement.input.setCustomValidity('')
+        input.setCustomValidity('')
       }
-      autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
+      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
     })
     .catch(error => {
       if (autoCheckElement.required) {
-        autoCheckElement.input.setCustomValidity(errorMessage(error) || 'Something went wrong')
+        input.setCustomValidity(errorMessage(error) || 'Something went wrong')
       }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      autoCheckElement.input.dispatchEvent(
-        new CustomEvent('auto-check-error', {detail: {message: errorMessage(error)}, bubbles: true})
-      )
+      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {message: errorMessage(error)}, bubbles: true}))
     })
     .then(always, always)
 }
