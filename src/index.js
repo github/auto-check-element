@@ -12,7 +12,7 @@ export default class AutoCheckElement extends HTMLElement {
 
   constructor() {
     super()
-    this.boundCheck = debounce(this.check.bind(this), 300)
+    this.boundCheck = debounce(check.bind(null, this), 300)
   }
 
   connectedCallback() {
@@ -67,59 +67,59 @@ export default class AutoCheckElement extends HTMLElement {
       this.removeAttribute('required')
     }
   }
+}
 
-  check() {
-    if (!this.src) {
-      throw new Error('missing src')
-    }
-    if (!this.csrf) {
-      throw new Error('missing csrf')
-    }
-
-    const body = new FormData()
-    body.append('authenticity_token', this.csrf)
-    body.append('value', this.input.value)
-
-    const id = body.entries ? [...body.entries()].sort().toString() : null
-    if (id && id === previousValues.get(this.input)) return
-    previousValues.set(this.input, id)
-
-    this.input.dispatchEvent(new CustomEvent('auto-check-send', {detail: {body}, bubbles: true}))
-
-    if (!this.input.value.trim()) {
-      this.input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
-      return
-    }
-
-    const always = () => {
-      this.dispatchEvent(new CustomEvent('loadend'))
-      this.input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
-    }
-
-    if (this.required) {
-      this.input.setCustomValidity('Verifying…')
-    }
-    this.dispatchEvent(new CustomEvent('loadstart'))
-    performCheck(this.input, body, this.src)
-      .then(data => {
-        this.dispatchEvent(new CustomEvent('load'))
-        const message = data ? data.trim() : null
-        if (this.required) {
-          this.input.setCustomValidity('')
-        }
-        this.input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
-      })
-      .catch(error => {
-        if (this.required) {
-          this.input.setCustomValidity(errorMessage(error) || 'Something went wrong')
-        }
-        this.dispatchEvent(new CustomEvent('error'))
-        this.input.dispatchEvent(
-          new CustomEvent('auto-check-error', {detail: {message: errorMessage(error)}, bubbles: true})
-        )
-      })
-      .then(always, always)
+function check(autoCheckElement) {
+  if (!autoCheckElement.src) {
+    throw new Error('missing src')
   }
+  if (!autoCheckElement.csrf) {
+    throw new Error('missing csrf')
+  }
+
+  const body = new FormData()
+  body.append('authenticity_token', autoCheckElement.csrf)
+  body.append('value', autoCheckElement.input.value)
+
+  const id = body.entries ? [...body.entries()].sort().toString() : null
+  if (id && id === previousValues.get(autoCheckElement.input)) return
+  previousValues.set(autoCheckElement.input, id)
+
+  autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-send', {detail: {body}, bubbles: true}))
+
+  if (!autoCheckElement.input.value.trim()) {
+    autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+    return
+  }
+
+  const always = () => {
+    autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
+    autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+  }
+
+  if (autoCheckElement.required) {
+    autoCheckElement.input.setCustomValidity('Verifying…')
+  }
+  autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
+  performCheck(autoCheckElement.input, body, autoCheckElement.src)
+    .then(data => {
+      autoCheckElement.dispatchEvent(new CustomEvent('load'))
+      const message = data ? data.trim() : null
+      if (autoCheckElement.required) {
+        autoCheckElement.input.setCustomValidity('')
+      }
+      autoCheckElement.input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
+    })
+    .catch(error => {
+      if (autoCheckElement.required) {
+        autoCheckElement.input.setCustomValidity(errorMessage(error) || 'Something went wrong')
+      }
+      autoCheckElement.dispatchEvent(new CustomEvent('error'))
+      autoCheckElement.input.dispatchEvent(
+        new CustomEvent('auto-check-error', {detail: {message: errorMessage(error)}, bubbles: true})
+      )
+    })
+    .then(always, always)
 }
 
 function errorMessage(error: XHRError) {

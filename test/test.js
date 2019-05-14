@@ -173,8 +173,8 @@ describe('auto-check element', function() {
       })
 
       input.value = 'hub'
-      autoCheckElement.check()
-      autoCheckElement.check()
+      input.dispatchEvent(new InputEvent('change'))
+      input.dispatchEvent(new InputEvent('change'))
     })
   })
 })
