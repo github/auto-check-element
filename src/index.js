@@ -5,21 +5,23 @@ import XHRError from './xhr-error'
 
 const requests = new WeakMap()
 const previousValues = new WeakMap()
-
-let boundCheck
+const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
 
 export default class AutoCheckElement extends HTMLElement {
   constructor() {
     super()
-    boundCheck = debounce(check.bind(null, this), 300)
+    checkFunctions.set(this, debounce(check.bind(null, this), 300))
   }
 
   connectedCallback() {
     const input = this.input
     if (!input) return
 
-    input.addEventListener('change', boundCheck)
-    input.addEventListener('input', boundCheck)
+    const checkFunction = checkFunctions.get(this)
+    if (!checkFunction) return
+
+    input.addEventListener('change', checkFunction)
+    input.addEventListener('input', checkFunction)
     input.autocomplete = 'off'
     input.spellcheck = false
   }
@@ -28,8 +30,11 @@ export default class AutoCheckElement extends HTMLElement {
     const input = this.input
     if (!input) return
 
-    input.removeEventListener('change', boundCheck)
-    input.removeEventListener('input', boundCheck)
+    const checkFunction = checkFunctions.get(this)
+    if (!checkFunction) return
+
+    input.removeEventListener('change', checkFunction)
+    input.removeEventListener('input', checkFunction)
     input.setCustomValidity('')
   }
 
