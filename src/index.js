@@ -82,17 +82,19 @@ export default class AutoCheckElement extends HTMLElement {
 }
 
 function check(autoCheckElement: AutoCheckElement) {
-  if (!autoCheckElement.src) {
+  const src = autoCheckElement.src
+  if (!src) {
     throw new Error('missing src')
   }
-  if (!autoCheckElement.csrf) {
+  const csrf = autoCheckElement.csrf
+  if (!csrf) {
     throw new Error('missing csrf')
   }
   const input = autoCheckElement.input
   if (!input) return
 
   const body = new FormData()
-  body.append('authenticity_token', autoCheckElement.csrf)
+  body.append('authenticity_token', csrf)
   body.append('value', input.value)
 
   const id = body.entries ? [...body.entries()].sort().toString() : null
@@ -115,7 +117,7 @@ function check(autoCheckElement: AutoCheckElement) {
     input.setCustomValidity('Verifying…')
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
-  performCheck(input, body, autoCheckElement.src)
+  performCheck(input, body, src)
     .then(data => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
       const message = data ? data.trim() : null
