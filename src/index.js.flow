@@ -1,0 +1,12 @@
+/* flow strict */
+
+declare module 'auto-check-element' {
+  declare export default class AutoCheckElement extends HTMLElement {
+    get src(): string;
+    set src(value: string): void;
+    get csrf(): string;
+    set csrf(value: string): void;
+    get required(): boolean;
+    set required(required: boolean): void;
+  }
+}
