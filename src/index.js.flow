@@ -2,6 +2,7 @@
 
 declare module 'auto-check-element' {
   declare export default class AutoCheckElement extends HTMLElement {
+    get input(): ?HTMLInputElement;
     get src(): string;
     set src(value: string): void;
     get csrf(): string;
