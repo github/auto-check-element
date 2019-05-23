@@ -5,13 +5,13 @@ An input element that validates its value against a server endpoint.
 ## Installation
 
 ```
-$ npm install --save auto-check-element
+$ npm install --save @github/auto-check-element
 ```
 
 ## Usage
 
 ```js
-import 'auto-check-element'
+import '@github/auto-check-element'
 ```
 
 ```erb
