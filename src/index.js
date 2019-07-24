@@ -118,33 +118,35 @@ function check(autoCheckElement: AutoCheckElement) {
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
   performCheck(input, body, src)
-    .then(data => {
+    .then(message => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
-      const message = data ? data.trim() : null
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
     })
     .catch(error => {
+      let validity = 'Something went wrong'
+
+      if (error.statusCode === 422 && error.responseText) {
+        if (error.contentType.includes('application/json')) {
+          validity = error.responseText.text
+        }
+        if (error.contentType.includes('text/plain')) {
+          validity = error.responseText
+        }
+      }
+
       if (autoCheckElement.required) {
-        input.setCustomValidity(errorMessage(error) || 'Something went wrong')
+        input.setCustomValidity(validity)
       }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {message: errorMessage(error)}, bubbles: true}))
+      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {message: error.responseText}, bubbles: true}))
     })
     .then(always, always)
 }
 
-function errorMessage(error: XHRError): ?string {
-  if (error.statusCode === 422 && error.responseText) {
-    if (error.contentType.includes('text/html; fragment')) {
-      return error.responseText
-    }
-  }
-}
-
-function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
+function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string | {text: string}> {
   const pending = requests.get(input)
   if (pending) pending.abort()
 
@@ -154,23 +156,32 @@ function performCheck(input: HTMLInputElement, body: FormData, url: string): Pro
   requests.set(input, xhr)
 
   xhr.open('POST', url, true)
-  xhr.setRequestHeader('Accept', 'text/html; fragment')
+  xhr.setRequestHeader('Accept', 'application/json, text/plain;q=0.9')
   const result = send(xhr, body)
   result.then(clear, clear)
   return result
 }
 
-function send(xhr: XMLHttpRequest, body: FormData): Promise<string> {
+function send(xhr: XMLHttpRequest, body: FormData): Promise<string | {text: string}> {
   return new Promise((resolve, reject) => {
     xhr.onload = function() {
+      let data = xhr.responseText
+      if (xhr.getResponseHeader('Content-Type') === 'application/json') {
+        data = JSON.parse(data)
+      }
+
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(xhr.responseText)
+        resolve(data)
       } else {
-        reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
+        reject(new XHRError(xhr.status, data, xhr.getResponseHeader('Content-Type')))
       }
     }
     xhr.onerror = function() {
-      reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
+      let data = xhr.responseText
+      if (xhr.getResponseHeader('Content-Type') === 'application/json') {
+        data = JSON.parse(data)
+      }
+      reject(new XHRError(xhr.status, data, xhr.getResponseHeader('Content-Type')))
     }
     xhr.send(body)
   })
