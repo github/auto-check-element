@@ -4,18 +4,28 @@
     <title>&lt;auto-check&gt; element</title>
   </head>
   <body>
+    <h3>Simple form</h3>
     <form>
       <p>Input 422 for an error response.</p>
       <auto-check csrf="foo" src="/demo">
         <input autofocus name="foo">
-        <code id="state"></code>
+        <code class="state"></code>
+      </auto-check>
+      <button disabled>submit</button>
+    </form>
+
+    <h3>Form that handles JSON</h3>
+    <form>
+      <p>Input 422 for an error response.</p>
+      <auto-check csrf="foo" src="/json-demo">
+        <input autofocus class="json" name="foo">
+        <code class="state"></code>
       </auto-check>
       <button disabled>submit</button>
     </form>
 
     <script>
-      const input = document.querySelector('input')
-      const button = document.querySelector('button')
+      let focusedInput
       class FakeXMLHttpRequest {
         abort() {
           // Do nothing.
@@ -26,28 +36,49 @@
         setRequestHeader(name, value) {
           // Do nothing.
         }
-        getResponseHeader(name, value) {
-          // Do nothing.
+        getResponseHeader(name) {
+          if (name === 'Content-Type' && focusedInput.classList.contains('json')) {
+            return 'application/json'
+          }
         }
         send() {
-          this.status = input.value === '422' ? 422 : 200
+          if (focusedInput.classList.contains('json')) {
+            this.responseText = '{"text": "success", "html": "<b>success</b>"}'
+          } else {
+            this.responseText = 'success'
+          }
+          this.status = focusedInput.value === '422' ? 422 : 200
           setTimeout(this.onload.bind(this), 0)
         }
       }
       window.XMLHttpRequest = FakeXMLHttpRequest
-      const state = document.getElementById('state')
-      document.addEventListener('auto-check-send', () => {
-        state.textContent = 'loading'
-        button.disabled = true
-      })
-      document.addEventListener('auto-check-success', () => {
-        state.textContent = 'success'
-        button.disabled = false
-      })
-      document.addEventListener('auto-check-error', () => {
-        state.textContent = 'error'
-        button.disabled = true
-      })
+
+      for (const form of document.querySelectorAll('form')) {
+        const formInput = form.querySelector('input')
+        const button = form.querySelector('button')
+        const state = form.querySelector('.state')
+
+        formInput.addEventListener('focus', () => {
+          focusedInput = formInput
+        })
+
+        form.addEventListener('auto-check-send', () => {
+          state.textContent = 'loading'
+          button.disabled = true
+        })
+        form.addEventListener('auto-check-success', event => {
+          if (focusedInput.classList.contains('json')) {
+            state.innerHTML = event.detail.message.html
+          } else {
+            state.textContent = event.detail.message
+          }
+          button.disabled = false
+        })
+        form.addEventListener('auto-check-error', () => {
+          state.textContent = 'error'
+          button.disabled = true
+        })
+      }
     </script>
 
     <script src="https://unpkg.com/@github/auto-check-element@latest/dist/index.umd.js"></script>
