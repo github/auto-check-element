@@ -130,7 +130,7 @@ function check(autoCheckElement: AutoCheckElement) {
 
       if (error.statusCode === 422 && error.responseText) {
         if (error.contentType.includes('application/json')) {
-          validity = error.responseText.text
+          validity = JSON.parse(error.responseText).text
         } else {
           validity = error.responseText
         }
@@ -163,23 +163,14 @@ function performCheck(input: HTMLInputElement, body: FormData, url: string): Pro
 function send(xhr: XMLHttpRequest, body: FormData): Promise<string | {text: string}> {
   return new Promise((resolve, reject) => {
     xhr.onload = function() {
-      let data = xhr.responseText
-      if (xhr.getResponseHeader('Content-Type') === 'application/json') {
-        data = JSON.parse(data)
-      }
-
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(data)
+        resolve(xhr.responseText)
       } else {
-        reject(new XHRError(xhr.status, data, xhr.getResponseHeader('Content-Type')))
+        reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
       }
     }
     xhr.onerror = function() {
-      let data = xhr.responseText
-      if (xhr.getResponseHeader('Content-Type') === 'application/json') {
-        data = JSON.parse(data)
-      }
-      reject(new XHRError(xhr.status, data, xhr.getResponseHeader('Content-Type')))
+      reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
     }
     xhr.send(body)
   })

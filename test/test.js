@@ -67,7 +67,7 @@ describe('auto-check element', function() {
           resolve(event.detail.message)
         })
       }).then(result => {
-        assert.deepEqual({text: 'This is a warning'}, result)
+        assert.deepEqual('{"text": "This is a warning"}', result)
       })
     })
 
@@ -82,7 +82,7 @@ describe('auto-check element', function() {
           resolve(event.detail.message)
         })
       }).then(result => {
-        assert.deepEqual({text: 'This is a error'}, result)
+        assert.deepEqual('{"text": "This is a error"}', result)
       })
     })
 
