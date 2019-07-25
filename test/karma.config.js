@@ -1,6 +1,5 @@
 function checker(request, response, next) {
   if (request.method === 'POST' && request.url.startsWith('/plaintext')) {
-    response.setHeader('Content-Type', 'text/plain')
     response.writeHead(200)
     response.end('This is a warning')
     return

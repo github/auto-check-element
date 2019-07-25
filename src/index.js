@@ -131,8 +131,7 @@ function check(autoCheckElement: AutoCheckElement) {
       if (error.statusCode === 422 && error.responseText) {
         if (error.contentType.includes('application/json')) {
           validity = error.responseText.text
-        }
-        if (error.contentType.includes('text/plain')) {
+        } else {
           validity = error.responseText
         }
       }
