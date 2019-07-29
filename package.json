@@ -4,12 +4,10 @@
   "description": "An input element that validates its value with a server endpoint.",
   "repository": "github/auto-check-element",
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",
-  "types": "index.d.ts",
   "scripts": {
     "clean": "rm -rf dist/",
     "lint": "github-lint",
