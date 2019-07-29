@@ -39,6 +39,8 @@
         getResponseHeader(name) {
           if (name === 'Content-Type' && focusedInput.classList.contains('json')) {
             return 'application/json'
+          } else {
+            return 'plain/text'
           }
         }
         send() {
