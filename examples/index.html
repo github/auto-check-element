@@ -70,7 +70,7 @@
         })
         form.addEventListener('auto-check-success', event => {
           if (focusedInput.classList.contains('json')) {
-            state.innerHTML = event.detail.message.html
+            state.innerHTML = JSON.parse(event.detail.message).html
           } else {
             state.textContent = event.detail.message
           }
