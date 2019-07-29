@@ -145,7 +145,7 @@ function check(autoCheckElement: AutoCheckElement) {
     .then(always, always)
 }
 
-function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string | {text: string}> {
+function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
   const pending = requests.get(input)
   if (pending) pending.abort()
 
@@ -160,7 +160,7 @@ function performCheck(input: HTMLInputElement, body: FormData, url: string): Pro
   return result
 }
 
-function send(xhr: XMLHttpRequest, body: FormData): Promise<string | {text: string}> {
+function send(xhr: XMLHttpRequest, body: FormData): Promise<string> {
   return new Promise((resolve, reject) => {
     xhr.onload = function() {
       if (xhr.status >= 200 && xhr.status < 300) {
