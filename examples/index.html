@@ -44,12 +44,14 @@
           }
         }
         send() {
-          if (focusedInput.classList.contains('json')) {
-            this.responseText = '{"text": "success", "html": "<b>success</b>"}'
+          const json = focusedInput.classList.contains('json')
+          if (focusedInput.value === '422') {
+            this.status = 422
+            this.responseText = json ? '{"text": "bad", "html": "<b>bad</b>"}' : 'bad'
           } else {
-            this.responseText = 'success'
+            this.status = 200
+            this.responseText = json ? '{"text": "success", "html": "<b>success</b>"}' : 'success'
           }
-          this.status = focusedInput.value === '422' ? 422 : 200
           setTimeout(this.onload.bind(this), 0)
         }
       }
