@@ -104,8 +104,12 @@ function check(autoCheckElement: AutoCheckElement) {
   const cancelled = !input.dispatchEvent(
     new CustomEvent('auto-check-send', {detail: {body}, bubbles: true, cancelable: true})
   )
+  
+  if (cancelled) {
+    return
+  }
 
-  if (cancelled || !input.value.trim()) {
+  if (!input.value.trim()) {
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
