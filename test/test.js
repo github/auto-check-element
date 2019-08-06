@@ -49,6 +49,23 @@ describe('auto-check element', function() {
       })
     })
 
+    it("doesn't set input as invalid if send event was prevented", function() {
+      return new Promise(resolve => {
+        const autoCheck = document.querySelector('auto-check')
+        autoCheck.required = true
+        const input = document.querySelector('input')
+        autoCheck.src = '/fail'
+        input.value = 'hub'
+        input.dispatchEvent(new InputEvent('change'))
+        input.addEventListener('auto-check-send', event => {
+          event.preventDefault()
+          resolve()
+        })
+      }).then(() => {
+        assert.isTrue(document.querySelector('input').checkValidity())
+      })
+    })
+
     it('emits a success event when server returns a non error response', function(done) {
       const input = document.querySelector('input')
       input.value = 'hub'
