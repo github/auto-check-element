@@ -104,7 +104,7 @@ function check(autoCheckElement: AutoCheckElement) {
   const cancelled = !input.dispatchEvent(
     new CustomEvent('auto-check-send', {detail: {body}, bubbles: true, cancelable: true})
   )
-  
+
   if (cancelled) {
     return
   }
