@@ -118,30 +118,31 @@ function check(autoCheckElement: AutoCheckElement) {
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
   performCheck(input, body, src)
-    .then(data => {
+    .then(message => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
-      const message = data ? data.trim() : null
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
     })
     .catch(error => {
+      let validity = 'Something went wrong'
+
+      if (error.statusCode === 422 && error.responseText) {
+        if (error.contentType.includes('application/json')) {
+          validity = JSON.parse(error.responseText).text
+        } else {
+          validity = error.responseText
+        }
+      }
+
       if (autoCheckElement.required) {
-        input.setCustomValidity(errorMessage(error) || 'Something went wrong')
+        input.setCustomValidity(validity)
       }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {message: errorMessage(error)}, bubbles: true}))
+      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {message: error.responseText}, bubbles: true}))
     })
     .then(always, always)
-}
-
-function errorMessage(error: XHRError): ?string {
-  if (error.statusCode === 422 && error.responseText) {
-    if (error.contentType.includes('text/html; fragment')) {
-      return error.responseText
-    }
-  }
 }
 
 function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
@@ -154,7 +155,6 @@ function performCheck(input: HTMLInputElement, body: FormData, url: string): Pro
   requests.set(input, xhr)
 
   xhr.open('POST', url, true)
-  xhr.setRequestHeader('Accept', 'text/html; fragment')
   const result = send(xhr, body)
   result.then(clear, clear)
   return result
