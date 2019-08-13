@@ -13,6 +13,12 @@ function checker(request, response, next) {
     response.writeHead(200)
     response.end('{"text": "This is a warning"}')
     return
+  } else if (request.method === 'POST' && request.url.startsWith('/error')) {
+    response.setHeader('Content-Type', 'text/html')
+    response.writeHead(422)
+    // eslint-disable-next-line github/unescaped-html-literal
+    response.end('<strong>Wrong parameters</strong>')
+    return
   }
   next()
 }

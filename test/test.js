@@ -180,5 +180,20 @@ describe('auto-check element', function() {
         assert.deepEqual('This is a warning', result)
       })
     })
+
+    it("doesn't emit events with HTML payload", function() {
+      return new Promise(resolve => {
+        const autoCheck = document.querySelector('auto-check')
+        const input = document.querySelector('input')
+        autoCheck.src = '/error'
+        input.value = 'hub'
+        input.dispatchEvent(new InputEvent('change'))
+        input.addEventListener('auto-check-error', event => {
+          resolve(event.detail.message)
+        })
+      }).then(result => {
+        assert.deepEqual('Something went wrong', result)
+      })
+    })
   })
 })
