@@ -131,7 +131,7 @@ function check(autoCheckElement: AutoCheckElement) {
       if (error.statusCode === 422 && error.responseText) {
         if (error.contentType.includes('application/json')) {
           validity = JSON.parse(error.responseText).text
-        } else {
+        } else if (error.contentType.includes('text/plain')) {
           validity = error.responseText
         }
       }
@@ -140,7 +140,12 @@ function check(autoCheckElement: AutoCheckElement) {
         input.setCustomValidity(validity)
       }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {message: error.responseText}, bubbles: true}))
+      input.dispatchEvent(
+        new CustomEvent('auto-check-error', {
+          detail: {message: error.responseText, contentType: error.contentType},
+          bubbles: true
+        })
+      )
     })
     .then(always, always)
 }
