@@ -1,6 +1,6 @@
 {
   "name": "@github/auto-check-element",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "An input element that validates its value with a server endpoint.",
   "repository": "github/auto-check-element",
   "files": [
@@ -17,7 +17,8 @@
     "build": "rollup -c && cp src/index.js.flow dist/index.esm.js.flow && cp src/index.js.flow dist/index.umd.js.flow",
     "pretest": "npm run build",
     "test": "karma start test/karma.config.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm publish --ignore-scripts --@github:registry='https://npm.pkg.github.com'"
   },
   "keywords": [
     "custom element",
