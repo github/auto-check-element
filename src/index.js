@@ -43,9 +43,12 @@ export default class AutoCheckElement extends HTMLElement {
     return input instanceof HTMLInputElement ? input : null
   }
 
-  get note(): ?HTMLElement {
-    const note = this.querySelector(this.noteSelector)
-    return note instanceof HTMLElement ? note : null
+  get note(): HTMLElement {
+    let note = this.querySelector(this.noteSelector)
+    if (!note) {
+      note = document.createElement('p')
+    }
+    return note
   }
 
   get noteSelector(): string {
