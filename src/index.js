@@ -141,6 +141,7 @@ function check(autoCheckElement: AutoCheckElement) {
       const message = getSuccessResponse(response)
       if (autoCheckElement.note && message) {
         autoCheckElement.note.innerHTML = message
+        autoCheckElement.note.hidden = false
       }
 
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response}, bubbles: true, cancelable: true}))
@@ -154,6 +155,7 @@ function check(autoCheckElement: AutoCheckElement) {
       // Set the received message as a success note.
       if (autoCheckElement.note) {
         autoCheckElement.note.innerHTML = message
+        autoCheckElement.note.hidden = false
       }
 
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
