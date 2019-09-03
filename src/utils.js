@@ -1,7 +1,10 @@
 /* @flow strict */
 
 export function getSuccessResponse(response: XMLHttpRequest): ?string {
-  if (response.responseText && ['text/html', 'text/plain'].includes(response.getResponseHeader('Content-Type'))) {
+  const contentType = response.getResponseHeader('Content-Type')
+  const isHTMLFragment = contentType.includes('text/html; fragment')
+  const isPlainText = contentType.includes('text/plain')
+  if (response.responseText && (isPlainText || isHTMLFragment)) {
     return response.responseText
   }
 }
