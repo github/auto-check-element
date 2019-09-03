@@ -7,7 +7,7 @@
     <h1>Simple form</h1>
     <form>
       <p>Input 422 for an error response.</p>
-      <auto-check csrf="foo" src="/demo" required>
+      <auto-check csrf="foo" src="/demo" data-note-selector=".state" required>
         <input autofocus name="foo" required>
         <code class="state"></code>
       </auto-check>
@@ -17,7 +17,7 @@
     <h1>Form that handles JSON</h1>
     <form>
       <p>Input 422 for an error response.</p>
-      <auto-check csrf="foo" src="/json-demo" required>
+      <auto-check csrf="foo" src="/json-demo" data-note-selector=".state" required>
         <input autofocus class="json" name="foo" required>
         <code class="state"></code>
       </auto-check>
@@ -37,10 +37,12 @@
           // Do nothing.
         }
         getResponseHeader(name) {
-          if (name === 'Content-Type' && focusedInput.classList.contains('json')) {
-            return 'application/json'
-          } else {
-            return 'plain/text'
+          if (name === 'Content-Type') {
+            if (focusedInput.value === '422' && focusedInput.classList.contains('json')) {
+              return 'application/json'
+            } else {
+              return 'text/plain'
+            }
           }
         }
         send() {
@@ -50,7 +52,7 @@
             this.responseText = json ? '{"text": "bad", "html": "<b>bad</b>"}' : 'bad'
           } else {
             this.status = 200
-            this.responseText = json ? '{"text": "success", "html": "<b>success</b>"}' : 'success'
+            this.responseText = 'success'
           }
           setTimeout(this.onload.bind(this), 0)
         }
@@ -65,21 +67,14 @@
         formInput.addEventListener('focus', () => {
           focusedInput = formInput
         })
-
         form.addEventListener('auto-check-send', () => {
           state.textContent = 'loading'
           button.disabled = true
         })
         form.addEventListener('auto-check-success', event => {
-          if (focusedInput.classList.contains('json')) {
-            state.innerHTML = JSON.parse(event.detail.message).html
-          } else {
-            state.textContent = event.detail.message
-          }
           button.disabled = false
         })
         form.addEventListener('auto-check-error', () => {
-          state.textContent = 'error'
           button.disabled = true
         })
       }
