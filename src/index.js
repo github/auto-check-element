@@ -144,7 +144,9 @@ function check(autoCheckElement: AutoCheckElement) {
         autoCheckElement.note.hidden = false
       }
 
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response}, bubbles: true, cancelable: true}))
+      input.dispatchEvent(
+        new CustomEvent('auto-check-success', {detail: {response, message}, bubbles: true, cancelable: true})
+      )
     })
     .catch(response => {
       const {message, validity} = getErrorResponse(response)
