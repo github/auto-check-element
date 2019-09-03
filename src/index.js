@@ -1,7 +1,7 @@
 /* @flow strict */
 
 import debounce from './debounce'
-import XHRError from './xhr-error'
+import {getSuccessResponse, getErrorResponse} from './utils'
 
 const requests = new WeakMap()
 const previousValues = new WeakMap()
@@ -41,6 +41,11 @@ export default class AutoCheckElement extends HTMLElement {
   get input(): ?HTMLInputElement {
     const input = this.querySelector('input')
     return input instanceof HTMLInputElement ? input : null
+  }
+
+  get note(): ?HTMLElement {
+    const note = this.querySelector('p')
+    return note instanceof HTMLElement ? note : null
   }
 
   get src(): string {
@@ -114,35 +119,41 @@ function check(autoCheckElement: AutoCheckElement) {
   }
 
   if (autoCheckElement.required) {
+    // TODO: Fetch this from a data attribute on the element.
     input.setCustomValidity('Verifying…')
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
   performCheck(input, body, src)
-    .then(message => {
+    .then(response => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
+      // Clear the input validity
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
-    })
-    .catch(error => {
-      let validity = 'Something went wrong'
 
-      if (error.statusCode === 422 && error.responseText) {
-        if (error.contentType.includes('application/json')) {
-          validity = JSON.parse(error.responseText).text
-        } else if (error.contentType.includes('text/plain')) {
-          validity = error.responseText
-        }
+      // Set the received message as a success note.
+      const message = getSuccessResponse(response)
+      if (autoCheckElement.note && message) {
+        autoCheckElement.note.innerHTML = message
       }
 
+      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response}, bubbles: true, cancelable: true}))
+    })
+    .catch(response => {
+      const {message, validity} = getErrorResponse(response)
       if (autoCheckElement.required) {
         input.setCustomValidity(validity)
       }
+
+      // Set the received message as a success note.
+      if (autoCheckElement.note) {
+        autoCheckElement.note.innerHTML = message
+      }
+
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
       input.dispatchEvent(
         new CustomEvent('auto-check-error', {
-          detail: {message: error.responseText, contentType: error.contentType},
+          detail: {response, message, validity},
           bubbles: true
         })
       )
@@ -150,7 +161,7 @@ function check(autoCheckElement: AutoCheckElement) {
     .then(always, always)
 }
 
-function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
+function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<XMLHttpRequest> {
   const pending = requests.get(input)
   if (pending) pending.abort()
 
@@ -165,17 +176,17 @@ function performCheck(input: HTMLInputElement, body: FormData, url: string): Pro
   return result
 }
 
-function send(xhr: XMLHttpRequest, body: FormData): Promise<string> {
+function send(xhr: XMLHttpRequest, body: FormData): Promise<XMLHttpRequest> {
   return new Promise((resolve, reject) => {
     xhr.onload = function() {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(xhr.responseText)
+        resolve(xhr)
       } else {
-        reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
+        reject(xhr)
       }
     }
     xhr.onerror = function() {
-      reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
+      reject(xhr)
     }
     xhr.send(body)
   })
