@@ -44,8 +44,14 @@ export default class AutoCheckElement extends HTMLElement {
   }
 
   get note(): ?HTMLElement {
-    const note = this.querySelector('p')
+    const note = this.querySelector(this.noteSelector)
     return note instanceof HTMLElement ? note : null
+  }
+
+  get noteSelector(): string {
+    const selector = this.getAttribute('data-note-selector')
+    if (!selector) return 'p'
+    return selector
   }
 
   get src(): string {
