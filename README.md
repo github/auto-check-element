@@ -27,6 +27,11 @@ The endpoint should respond to POST requests with:
  - a 422 HTTP status code if the provided value is invalid.
  - a optional error message in the body and a `Content-Type` header with a value of `text/html; fragment`.
 
+`<auto-check>` will output the server response into the first `<p>`, `.error`, `.warning` element it find within it's
+child elements.
+
+Check out the [examples](https://github.github.io/auto-check-element/examples/) for more info on how you can use it.
+
 ## Events
 
 ```js
@@ -55,12 +60,15 @@ input.addEventListener('auto-check-send', function(event) {
   body.append('custom_form_data', 'value')
 })
 input.addEventListener('auto-check-success', function(event) {
-  const {message} = event.detail
-  console.log('Validation passed', message)
+  const {response, message} = event.detail
+  console.log('Server response: ', response)
+  console.log('Validation passed: ', message)
 })
 input.addEventListener('auto-check-error', function(event) {
-  const {message} = event.detail
-  console.log('Validation failed', message)
+  const {response, validty, message} = event.detail
+  console.log('Server response: ', response)
+  console.log('Input validation message: ', response)
+  console.log('Validation failed: ', message)
 })
 input.addEventListener('auto-check-complete', function(event) {
   console.log('Validation complete', event)
