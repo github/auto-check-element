@@ -52,9 +52,7 @@ export default class AutoCheckElement extends HTMLElement {
   }
 
   get noteSelector(): string {
-    const selector = this.getAttribute('data-note-selector')
-    if (!selector) return 'p'
-    return selector
+    return this.getAttribute('data-note-selector') || 'p, .error, .warning'
   }
 
   get src(): string {
