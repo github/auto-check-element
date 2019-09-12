@@ -4,3 +4,9 @@ export default class AutoCheckElement extends HTMLElement {
   csrf: string;
   required: boolean;
 }
+
+declare global {
+  interface Window {
+    AutoCheckElement: typeof AutoCheckElement
+  }
+}
