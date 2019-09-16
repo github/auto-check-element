@@ -126,26 +126,11 @@ function check(autoCheckElement: AutoCheckElement) {
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
     })
     .catch(error => {
-      let validity = 'Something went wrong'
-
-      if (error.statusCode === 422 && error.responseText) {
-        if (error.contentType.includes('application/json')) {
-          validity = JSON.parse(error.responseText).text
-        } else if (error.contentType.includes('text/plain')) {
-          validity = error.responseText
-        }
-      }
-
-      if (autoCheckElement.required) {
-        input.setCustomValidity(validity)
-      }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      input.dispatchEvent(
-        new CustomEvent('auto-check-error', {
-          detail: {message: error.responseText, contentType: error.contentType},
-          bubbles: true
-        })
-      )
+      if (autoCheckElement.required) {
+        input.setCustomValidity('Input is not valid')
+      }
+      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {error}, bubbles: true}))
     })
     .then(always, always)
 }

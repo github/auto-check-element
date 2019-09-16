@@ -79,7 +79,7 @@ describe('auto-check element', function() {
         input.value = 'hub'
         input.dispatchEvent(new InputEvent('change'))
         input.addEventListener('auto-check-error', () => {
-          resolve(event.detail.message)
+          resolve(event.detail.error.responseText)
         })
       }).then(result => {
         assert.deepEqual('{"text": "This is a error"}', result)
@@ -178,23 +178,6 @@ describe('auto-check element', function() {
         })
       }).then(result => {
         assert.deepEqual('This is a warning', result)
-      })
-    })
-
-    describe('`auto-check-error` event', function() {
-      it('includes `Content-Type` header in event payload', function() {
-        return new Promise(resolve => {
-          const autoCheck = document.querySelector('auto-check')
-          const input = document.querySelector('input')
-          autoCheck.src = '/fail'
-          input.value = 'hub'
-          input.dispatchEvent(new InputEvent('change'))
-          input.addEventListener('auto-check-error', event => {
-            resolve(event.detail.contentType)
-          })
-        }).then(contentType => {
-          assert.equal('application/json', contentType)
-        })
       })
     })
   })
