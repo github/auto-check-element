@@ -4,6 +4,8 @@ import debounce from './debounce'
 
 const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
+const requests = new WeakMap()
+const abortControllers = new WeakMap()
 
 class ErrorWithResponse extends Error {
   response: Response
@@ -30,6 +32,10 @@ export default class AutoCheckElement extends HTMLElement {
     input.addEventListener('input', checkFunction)
     input.autocomplete = 'off'
     input.spellcheck = false
+
+    if ('AbortController' in window) {
+      abortControllers.set(this, new AbortController())
+    }
   }
 
   disconnectedCallback() {
@@ -123,7 +129,30 @@ function check(autoCheckElement: AutoCheckElement) {
     input.setCustomValidity('Verifying…')
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
-  fetch(src, {body, method: 'POST'})
+
+  const options: RequestOptions = {body, method: 'POST'}
+
+  let controller = abortControllers.get(autoCheckElement)
+  if (controller) {
+    const inflight = requests.get(autoCheckElement)
+
+    // If there is a signal, it means we are already in flight.
+    // Cancel that request and create a new signal.
+    if (inflight) {
+      // Cancel the in-flight request.
+      controller.abort()
+
+      // We need to create a new controller so we can get a new signal?
+      controller = new AbortController()
+      abortControllers.set(autoCheckElement, controller)
+    }
+
+    // Set the component as being in-flight
+    requests.set(autoCheckElement, true)
+    options.signal = controller.signal
+  }
+
+  fetch(src, options)
     .then(response => {
       if (response.status !== 200) {
         throw new ErrorWithResponse(response.statusText, response)
@@ -136,6 +165,9 @@ function check(autoCheckElement: AutoCheckElement) {
         input.setCustomValidity('')
       }
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
+
+      // Mark the component as not being in-flight any more.
+      requests.delete(autoCheckElement)
     })
     .catch(async error => {
       let validity = 'Something went wrong'
@@ -162,6 +194,8 @@ function check(autoCheckElement: AutoCheckElement) {
           bubbles: true
         })
       )
+      // Mark the component as not being in-flight any more.
+      requests.delete(autoCheckElement)
     })
     .then(always, always)
 }
