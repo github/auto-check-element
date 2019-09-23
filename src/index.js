@@ -130,7 +130,12 @@ function check(autoCheckElement: AutoCheckElement) {
       if (autoCheckElement.required) {
         input.setCustomValidity('Input is not valid')
       }
-      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {error}, bubbles: true}))
+      input.dispatchEvent(
+        new CustomEvent('auto-check-error', {
+          detail: {message: error.responseText, contentType: error.contentType},
+          bubbles: true
+        })
+      )
     })
     .then(always, always)
 }
