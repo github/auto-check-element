@@ -1,11 +1,17 @@
 /* @flow strict */
 
 import debounce from './debounce'
-import XHRError from './xhr-error'
 
-const requests = new WeakMap()
 const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
+
+class ErrorWithResponse extends Error {
+  response: Response
+  constructor(message, response) {
+    super(message)
+    this.response = response
+  }
+}
 
 export default class AutoCheckElement extends HTMLElement {
   constructor() {
@@ -117,7 +123,13 @@ function check(autoCheckElement: AutoCheckElement) {
     input.setCustomValidity('Verifying…')
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
-  performCheck(input, body, src)
+  fetch(src, {body, method: 'POST'})
+    .then(response => {
+      if (response.status !== 200) {
+        throw new ErrorWithResponse(response.statusText, response)
+      }
+      return response.text()
+    })
     .then(message => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
       if (autoCheckElement.required) {
@@ -125,14 +137,18 @@ function check(autoCheckElement: AutoCheckElement) {
       }
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
     })
-    .catch(error => {
+    .catch(async error => {
       let validity = 'Something went wrong'
 
-      if (error.statusCode === 422 && error.responseText) {
-        if (error.contentType.includes('application/json')) {
-          validity = JSON.parse(error.responseText).text
-        } else if (error.contentType.includes('text/plain')) {
-          validity = error.responseText
+      const response = error.response
+      const message = await error.response.text()
+      const contentType = error.response.headers.get('Content-Type')
+
+      if (response.status === 422 && message) {
+        if (contentType.includes('application/json')) {
+          validity = JSON.parse(message).text
+        } else if (contentType.includes('text/plain')) {
+          validity = message
         }
       }
 
@@ -142,43 +158,12 @@ function check(autoCheckElement: AutoCheckElement) {
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
       input.dispatchEvent(
         new CustomEvent('auto-check-error', {
-          detail: {message: error.responseText, contentType: error.contentType},
+          detail: {message, contentType},
           bubbles: true
         })
       )
     })
     .then(always, always)
-}
-
-function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
-  const pending = requests.get(input)
-  if (pending) pending.abort()
-
-  const clear = () => requests.delete(input)
-
-  const xhr = new XMLHttpRequest()
-  requests.set(input, xhr)
-
-  xhr.open('POST', url, true)
-  const result = send(xhr, body)
-  result.then(clear, clear)
-  return result
-}
-
-function send(xhr: XMLHttpRequest, body: FormData): Promise<string> {
-  return new Promise((resolve, reject) => {
-    xhr.onload = function() {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(xhr.responseText)
-      } else {
-        reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
-      }
-    }
-    xhr.onerror = function() {
-      reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
-    }
-    xhr.send(body)
-  })
 }
 
 if (!window.customElements.get('auto-check')) {
