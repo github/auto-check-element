@@ -4,7 +4,6 @@ import debounce from './debounce'
 
 const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
-const requests = new WeakMap()
 const abortControllers = new WeakMap()
 
 class ErrorWithResponse extends Error {
@@ -132,25 +131,20 @@ function check(autoCheckElement: AutoCheckElement) {
 
   const options: RequestOptions = {body, method: 'POST'}
 
+  // If there is a controller, it means we are already in flight.
+  // Cancel that request and create a new signal.
   let controller = abortControllers.get(autoCheckElement)
   if (controller) {
-    const inflight = requests.get(autoCheckElement)
-
-    // If there is a signal, it means we are already in flight.
-    // Cancel that request and create a new signal.
-    if (inflight) {
-      // Cancel the in-flight request.
-      controller.abort()
-
-      // We need to create a new controller so we can get a new signal?
-      controller = new AbortController()
-      abortControllers.set(autoCheckElement, controller)
-    }
-
-    // Set the component as being in-flight
-    requests.set(autoCheckElement, true)
-    options.signal = controller.signal
+    // Cancel the in-flight request.
+    controller.abort()
   }
+
+  // We need to create a new controller so we can get a new signal?
+  controller = new AbortController()
+  abortControllers.set(autoCheckElement, controller)
+
+  // Set the component as being in-flight
+  options.signal = controller.signal
 
   fetch(src, options)
     .then(response => {
@@ -167,7 +161,7 @@ function check(autoCheckElement: AutoCheckElement) {
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
 
       // Mark the component as not being in-flight any more.
-      requests.delete(autoCheckElement)
+      abortControllers.delete(autoCheckElement)
     })
     .catch(async error => {
       let validity = 'Something went wrong'
@@ -195,7 +189,7 @@ function check(autoCheckElement: AutoCheckElement) {
         })
       )
       // Mark the component as not being in-flight any more.
-      requests.delete(autoCheckElement)
+      abortControllers.delete(autoCheckElement)
     })
     .then(always, always)
 }
