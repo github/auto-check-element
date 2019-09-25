@@ -151,31 +151,25 @@ function check(autoCheckElement: AutoCheckElement) {
       if (response.status !== 200) {
         throw new ErrorWithResponse(response.statusText, response)
       }
-      return response.text()
+      return response
     })
-    .then(message => {
+    .then(response => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
+      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
 
       // Mark the component as not being in-flight any more.
       abortControllers.delete(autoCheckElement)
     })
-    .catch(async error => {
-      const message = await error.response.text()
-      const contentType = error.response.headers.get('Content-Type')
-
+    .catch(error => {
       if (autoCheckElement.required) {
         input.setCustomValidity('Input is not valid')
       }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
       input.dispatchEvent(
-        new CustomEvent('auto-check-error', {
-          detail: {message, contentType},
-          bubbles: true
-        })
+        new CustomEvent('auto-check-error', {detail: {response: error.response.clone()}, bubbles: true})
       )
       // Mark the component as not being in-flight any more.
       abortControllers.delete(autoCheckElement)
