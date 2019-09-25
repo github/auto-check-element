@@ -163,7 +163,6 @@ function check(autoCheckElement: AutoCheckElement) {
       // Mark the component as not being in-flight any more.
       abortControllers.delete(autoCheckElement)
     })
-    .catch(error => {
     .catch(async error => {
       let validity = 'Something went wrong'
 
