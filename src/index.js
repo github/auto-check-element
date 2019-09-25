@@ -164,22 +164,11 @@ function check(autoCheckElement: AutoCheckElement) {
       abortControllers.delete(autoCheckElement)
     })
     .catch(async error => {
-      let validity = 'Something went wrong'
-
-      const response = error.response
       const message = await error.response.text()
       const contentType = error.response.headers.get('Content-Type')
 
-      if (response.status === 422 && message) {
-        if (contentType.includes('application/json')) {
-          validity = JSON.parse(message).text
-        } else if (contentType.includes('text/plain')) {
-          validity = message
-        }
-      }
-
       if (autoCheckElement.required) {
-        input.setCustomValidity(validity)
+        input.setCustomValidity('Input is not valid')
       }
       autoCheckElement.dispatchEvent(new CustomEvent('error'))
       input.dispatchEvent(
