@@ -1,11 +1,18 @@
 /* @flow strict */
 
 import debounce from './debounce'
-import XHRError from './xhr-error'
 
-const requests = new WeakMap()
 const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
+const abortControllers = new WeakMap()
+
+class ErrorWithResponse extends Error {
+  response: Response
+  constructor(message, response) {
+    super(message)
+    this.response = response
+  }
+}
 
 export default class AutoCheckElement extends HTMLElement {
   constructor() {
@@ -24,6 +31,10 @@ export default class AutoCheckElement extends HTMLElement {
     input.addEventListener('input', checkFunction)
     input.autocomplete = 'off'
     input.spellcheck = false
+
+    if ('AbortController' in window) {
+      abortControllers.set(this, new AbortController())
+    }
   }
 
   disconnectedCallback() {
@@ -117,58 +128,71 @@ function check(autoCheckElement: AutoCheckElement) {
     input.setCustomValidity('Verifying…')
   }
   autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
-  performCheck(input, body, src)
+
+  const options: RequestOptions = {body, method: 'POST'}
+
+  // If there is a controller, it means we are already in flight.
+  // Cancel that request and create a new signal.
+  let controller = abortControllers.get(autoCheckElement)
+  if (controller) {
+    // Cancel the in-flight request.
+    controller.abort()
+  }
+
+  // We need to create a new controller so we can get a new signal?
+  controller = new AbortController()
+  abortControllers.set(autoCheckElement, controller)
+
+  // Set the component as being in-flight
+  options.signal = controller.signal
+
+  fetch(src, options)
+    .then(response => {
+      if (response.status !== 200) {
+        throw new ErrorWithResponse(response.statusText, response)
+      }
+      return response.text()
+    })
     .then(message => {
       autoCheckElement.dispatchEvent(new CustomEvent('load'))
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
+
+      // Mark the component as not being in-flight any more.
+      abortControllers.delete(autoCheckElement)
     })
     .catch(error => {
-      autoCheckElement.dispatchEvent(new CustomEvent('error'))
+    .catch(async error => {
+      let validity = 'Something went wrong'
+
+      const response = error.response
+      const message = await error.response.text()
+      const contentType = error.response.headers.get('Content-Type')
+
+      if (response.status === 422 && message) {
+        if (contentType.includes('application/json')) {
+          validity = JSON.parse(message).text
+        } else if (contentType.includes('text/plain')) {
+          validity = message
+        }
+      }
+
       if (autoCheckElement.required) {
         input.setCustomValidity('Input is not valid')
       }
+      autoCheckElement.dispatchEvent(new CustomEvent('error'))
       input.dispatchEvent(
         new CustomEvent('auto-check-error', {
-          detail: {message: error.responseText, contentType: error.contentType},
+          detail: {message, contentType},
           bubbles: true
         })
       )
+      // Mark the component as not being in-flight any more.
+      abortControllers.delete(autoCheckElement)
     })
     .then(always, always)
-}
-
-function performCheck(input: HTMLInputElement, body: FormData, url: string): Promise<string> {
-  const pending = requests.get(input)
-  if (pending) pending.abort()
-
-  const clear = () => requests.delete(input)
-
-  const xhr = new XMLHttpRequest()
-  requests.set(input, xhr)
-
-  xhr.open('POST', url, true)
-  const result = send(xhr, body)
-  result.then(clear, clear)
-  return result
-}
-
-function send(xhr: XMLHttpRequest, body: FormData): Promise<string> {
-  return new Promise((resolve, reject) => {
-    xhr.onload = function() {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(xhr.responseText)
-      } else {
-        reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
-      }
-    }
-    xhr.onerror = function() {
-      reject(new XHRError(xhr.status, xhr.responseText, xhr.getResponseHeader('Content-Type')))
-    }
-    xhr.send(body)
-  })
 }
 
 if (!window.customElements.get('auto-check')) {
