@@ -164,6 +164,9 @@ function check(autoCheckElement: AutoCheckElement) {
       abortControllers.delete(autoCheckElement)
     })
     .catch(async error => {
+      if (error.name === 'AbortError') {
+        return
+      }
       const message = await error.response.text()
       const contentType = error.response.headers.get('Content-Type')
 
