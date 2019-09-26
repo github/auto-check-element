@@ -139,7 +139,6 @@ function check(autoCheckElement: AutoCheckElement) {
     controller.abort()
   }
 
-  // We need to create a new controller so we can get a new signal?
   controller = new AbortController()
   abortControllers.set(autoCheckElement, controller)
 
