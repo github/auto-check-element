@@ -147,8 +147,15 @@ async function check(autoCheckElement: AutoCheckElement) {
     if (autoCheckElement.required) {
       input.setCustomValidity('Input is not valid')
     }
-    autoCheckElement.dispatchEvent(new CustomEvent('error'))
-    input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
+
+    // Dispatch validation error event if there is a validation error,
+    // otherwise dispatch a normal error event.
+    if (response.status === 422) {
+      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
+    } else {
+      autoCheckElement.dispatchEvent(new CustomEvent('error'))
+    }
+
     // Mark the component as not being in-flight any more.
     abortControllers.delete(autoCheckElement)
 
