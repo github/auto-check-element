@@ -144,6 +144,7 @@ async function check(autoCheckElement: AutoCheckElement) {
     if (!response) {
       throw error
     }
+
     if (autoCheckElement.required) {
       input.setCustomValidity('Input is not valid')
     }
@@ -159,19 +160,22 @@ async function check(autoCheckElement: AutoCheckElement) {
     // Mark the component as not being in-flight any more.
     abortControllers.delete(autoCheckElement)
 
+    // Dispatch end of lifetime events
     autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
 
-  autoCheckElement.dispatchEvent(new CustomEvent('load'))
   if (autoCheckElement.required) {
     input.setCustomValidity('')
   }
+  autoCheckElement.dispatchEvent(new CustomEvent('load'))
   input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
 
   // Mark the component as not being in-flight any more.
   abortControllers.delete(autoCheckElement)
+
+  // Dispatch end of lifetime events
   autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
   input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
 }
