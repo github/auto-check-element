@@ -6,14 +6,6 @@ const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
 const abortControllers = new WeakMap()
 
-class ErrorWithResponse extends Error {
-  response: Response
-  constructor(message, response) {
-    super(message)
-    this.response = response
-  }
-}
-
 export default class AutoCheckElement extends HTMLElement {
   constructor() {
     super()
@@ -92,7 +84,7 @@ export default class AutoCheckElement extends HTMLElement {
   }
 }
 
-function check(autoCheckElement: AutoCheckElement) {
+async function check(autoCheckElement: AutoCheckElement) {
   const src = autoCheckElement.src
   if (!src) {
     throw new Error('missing src')
@@ -119,11 +111,6 @@ function check(autoCheckElement: AutoCheckElement) {
     return
   }
 
-  const always = () => {
-    autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
-  }
-
   if (autoCheckElement.required) {
     input.setCustomValidity('Verifying…')
   }
@@ -146,35 +133,40 @@ function check(autoCheckElement: AutoCheckElement) {
   // Set the component as being in-flight
   options.signal = controller.signal
 
-  fetch(src, options)
-    .then(response => {
-      if (response.status !== 200) {
-        throw new ErrorWithResponse(response.statusText, response)
-      }
-      return response
-    })
-    .then(response => {
-      autoCheckElement.dispatchEvent(new CustomEvent('load'))
-      if (autoCheckElement.required) {
-        input.setCustomValidity('')
-      }
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
+  let response
 
-      // Mark the component as not being in-flight any more.
-      abortControllers.delete(autoCheckElement)
-    })
-    .catch(error => {
-      if (autoCheckElement.required) {
-        input.setCustomValidity('Input is not valid')
-      }
-      autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      input.dispatchEvent(
-        new CustomEvent('auto-check-error', {detail: {response: error.response.clone()}, bubbles: true})
-      )
-      // Mark the component as not being in-flight any more.
-      abortControllers.delete(autoCheckElement)
-    })
-    .then(always, always)
+  try {
+    response = await fetch(src, options)
+    if (response.status !== 200) {
+      throw new Error('Non 200 response')
+    }
+  } catch (error) {
+    if (!response) {
+      throw error
+    }
+    if (autoCheckElement.required) {
+      input.setCustomValidity('Input is not valid')
+    }
+    autoCheckElement.dispatchEvent(new CustomEvent('error'))
+    input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
+    // Mark the component as not being in-flight any more.
+    abortControllers.delete(autoCheckElement)
+
+    autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
+    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+    return
+  }
+
+  autoCheckElement.dispatchEvent(new CustomEvent('load'))
+  if (autoCheckElement.required) {
+    input.setCustomValidity('')
+  }
+  input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
+
+  // Mark the component as not being in-flight any more.
+  abortControllers.delete(autoCheckElement)
+  autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
+  input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
 }
 
 if (!window.customElements.get('auto-check')) {
