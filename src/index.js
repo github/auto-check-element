@@ -4,15 +4,7 @@ import debounce from './debounce'
 
 const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
-const abortControllers = new WeakMap()
-
-class ErrorWithResponse extends Error {
-  response: Response
-  constructor(message, response) {
-    super(message)
-    this.response = response
-  }
-}
+const requests = new WeakMap()
 
 export default class AutoCheckElement extends HTMLElement {
   constructor() {
@@ -31,10 +23,6 @@ export default class AutoCheckElement extends HTMLElement {
     input.addEventListener('input', checkFunction)
     input.autocomplete = 'off'
     input.spellcheck = false
-
-    if ('AbortController' in window) {
-      abortControllers.set(this, new AbortController())
-    }
   }
 
   disconnectedCallback() {
@@ -92,7 +80,65 @@ export default class AutoCheckElement extends HTMLElement {
   }
 }
 
-function check(autoCheckElement: AutoCheckElement) {
+function makeDeferred<T>(): [Promise<T>, (T) => Promise<T>, (Error) => T] {
+  let resolve
+  let reject
+  const promise = new Promise(function(_resolve, _reject) {
+    resolve = _resolve
+    reject = _reject
+  })
+
+  if (!resolve) throw new Error('invariant: resolve')
+  if (!reject) throw new Error('invariant: reject')
+
+  return [promise, resolve, reject]
+}
+
+function makeAbortController() {
+  if ('AbortController' in window) {
+    return new AbortController()
+  }
+  return {signal: null, abort() {}}
+}
+
+async function slidingPromiseFetch(el: HTMLElement, url: string, options: RequestOptions = {}): Promise<Response> {
+  let request = requests.get(el)
+  const [promise, resolve, reject] = makeDeferred<Response>()
+
+  if (request) {
+    request.controller.abort()
+    request.controller = makeAbortController()
+  } else {
+    el.dispatchEvent(new CustomEvent('loadstart'))
+    request = {controller: makeAbortController(), promise, resolve, reject}
+    requests.set(el, request)
+  }
+
+  options.signal = request.controller.signal
+
+  try {
+    const response = await fetch(url, options)
+    el.dispatchEvent(new CustomEvent('load'))
+    el.dispatchEvent(new CustomEvent('loadend'))
+
+    requests.delete(el)
+    request.resolve(response)
+
+    return response
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      el.dispatchEvent(new CustomEvent('error'))
+      el.dispatchEvent(new CustomEvent('loadend'))
+
+      requests.delete(el)
+      request.reject(error)
+    }
+  }
+
+  return request.promise
+}
+
+async function check(autoCheckElement: AutoCheckElement) {
   const src = autoCheckElement.src
   if (!src) {
     throw new Error('missing src')
@@ -119,68 +165,28 @@ function check(autoCheckElement: AutoCheckElement) {
     return
   }
 
-  const always = () => {
-    autoCheckElement.dispatchEvent(new CustomEvent('loadend'))
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
-  }
+  try {
+    if (autoCheckElement.required) {
+      input.setCustomValidity('Verifying…')
+    }
 
-  if (autoCheckElement.required) {
-    input.setCustomValidity('Verifying…')
-  }
-  autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
-
-  const options: RequestOptions = {body, method: 'POST'}
-
-  // If there is a controller, it means we are already in flight.
-  // Cancel that request and create a new signal.
-  let controller = abortControllers.get(autoCheckElement)
-  if (controller) {
-    // Cancel the in-flight request.
-    controller.abort()
-  }
-
-  // We need to create a new controller so we can get a new signal?
-  controller = new AbortController()
-  abortControllers.set(autoCheckElement, controller)
-
-  // Set the component as being in-flight
-  options.signal = controller.signal
-
-  fetch(src, options)
-    .then(response => {
-      if (response.status !== 200) {
-        throw new ErrorWithResponse(response.statusText, response)
-      }
-      return response.text()
-    })
-    .then(message => {
-      autoCheckElement.dispatchEvent(new CustomEvent('load'))
+    const response = await slidingPromiseFetch(autoCheckElement, src, {body, method: 'POST'})
+    if (response.status === 200) {
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {message}, bubbles: true}))
-
-      // Mark the component as not being in-flight any more.
-      abortControllers.delete(autoCheckElement)
-    })
-    .catch(async error => {
-      const message = await error.response.text()
-      const contentType = error.response.headers.get('Content-Type')
-
+      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
+    } else {
       if (autoCheckElement.required) {
         input.setCustomValidity('Input is not valid')
       }
-      autoCheckElement.dispatchEvent(new CustomEvent('error'))
-      input.dispatchEvent(
-        new CustomEvent('auto-check-error', {
-          detail: {message, contentType},
-          bubbles: true
-        })
-      )
-      // Mark the component as not being in-flight any more.
-      abortControllers.delete(autoCheckElement)
-    })
-    .then(always, always)
+      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
+    }
+  } catch (error) {
+    // We've caught the network error here but don't need to handle it since the `performCheck` function has dispatched the events needed.
+  } finally {
+    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+  }
 }
 
 if (!window.customElements.get('auto-check')) {
