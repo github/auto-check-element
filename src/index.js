@@ -1,6 +1,6 @@
 /* @flow strict */
 
-import debounce from './debounce'
+import {debounce} from '@github/mini-throttle'
 
 const previousValues = new WeakMap()
 const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
