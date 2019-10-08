@@ -103,7 +103,7 @@ function makeAbortController() {
 
 async function slidingPromiseFetch(el: HTMLElement, url: string, options: RequestOptions = {}): Promise<Response> {
   let request = requests.get(el)
-  const [promise, resolve, reject] = makeDeferred<Response>()
+  const [promise, resolve, reject] = makeDeferred()
 
   if (request) {
     request.controller.abort()
