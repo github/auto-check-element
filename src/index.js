@@ -183,7 +183,7 @@ async function check(autoCheckElement: AutoCheckElement) {
       input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
     }
   } catch (error) {
-    // We've caught the network error here but don't need to handle it since the `performCheck` function has dispatched the events needed.
+    // We've caught the network error here but don't need to handle it since the `slidingPromiseFetch` function has dispatched the events needed.
   } finally {
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   }
