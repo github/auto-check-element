@@ -165,11 +165,11 @@ async function check(autoCheckElement: AutoCheckElement) {
     return
   }
 
-  try {
-    if (autoCheckElement.required) {
-      input.setCustomValidity('Verifying…')
-    }
+  if (autoCheckElement.required) {
+    input.setCustomValidity('Verifying…')
+  }
 
+  try {
     const response = await slidingPromiseFetch(autoCheckElement, src, {body, method: 'POST'})
     if (response.status === 200) {
       if (autoCheckElement.required) {
