@@ -4,10 +4,10 @@ import debounce from './debounce'
 
 type State = {
   check: Event => mixed,
+  previousValue: ?string,
   request: ?Request
 }
 
-const previousValues = new WeakMap()
 const states = new WeakMap<AutoCheckElement, State>()
 const requests = new WeakMap()
 
@@ -17,7 +17,7 @@ export default class AutoCheckElement extends HTMLElement {
     if (!input) return
 
     const checker = debounce(check.bind(null, this), 300)
-    const state = {check: checker, request: null}
+    const state = {check: checker, request: null, previousValue: null}
     states.set(this, state)
 
     input.addEventListener('change', checker)
@@ -152,13 +152,16 @@ async function check(autoCheckElement: AutoCheckElement) {
   const input = autoCheckElement.input
   if (!input) return
 
+  const state = states.get(autoCheckElement)
+  if (!state) return
+
   const body = new FormData()
   body.append('authenticity_token', csrf)
   body.append('value', input.value)
 
   const id = body.entries ? [...body.entries()].sort().toString() : null
-  if (id && id === previousValues.get(input)) return
-  previousValues.set(input, id)
+  if (id && id === state.previousValue) return
+  state.previousValue = id
 
   input.dispatchEvent(new CustomEvent('auto-check-send', {detail: {body}, bubbles: true}))
 
