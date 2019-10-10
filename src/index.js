@@ -165,10 +165,12 @@ async function check(autoCheckElement: AutoCheckElement) {
       }
       input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
     }
-  } catch (error) {
-    // Network and abort errors handled already.
-  } finally {
     state.controller = null
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      state.controller = null
+    }
+  } finally {
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   }
 }
