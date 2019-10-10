@@ -2,14 +2,15 @@
 
 import debounce from './debounce'
 
+type Controller = AbortController | {signal: ?AbortSignal, abort: () => void}
+
 type State = {
   check: Event => mixed,
   previousValue: ?string,
-  request: ?Request
+  controller: ?Controller
 }
 
 const states = new WeakMap<AutoCheckElement, State>()
-const requests = new WeakMap()
 
 export default class AutoCheckElement extends HTMLElement {
   connectedCallback() {
@@ -17,7 +18,7 @@ export default class AutoCheckElement extends HTMLElement {
     if (!input) return
 
     const checker = debounce(check.bind(null, this), 300)
-    const state = {check: checker, request: null, previousValue: null}
+    const state = {check: checker, controller: null, previousValue: null}
     states.set(this, state)
 
     input.addEventListener('change', checker)
@@ -82,20 +83,6 @@ export default class AutoCheckElement extends HTMLElement {
   }
 }
 
-function makeDeferred<T>(): [Promise<T>, (T) => Promise<T>, (Error) => T] {
-  let resolve
-  let reject
-  const promise = new Promise(function(_resolve, _reject) {
-    resolve = _resolve
-    reject = _reject
-  })
-
-  if (!resolve) throw new Error('invariant: resolve')
-  if (!reject) throw new Error('invariant: reject')
-
-  return [promise, resolve, reject]
-}
-
 function makeAbortController() {
   if ('AbortController' in window) {
     return new AbortController()
@@ -103,41 +90,19 @@ function makeAbortController() {
   return {signal: null, abort() {}}
 }
 
-async function slidingPromiseFetch(el: HTMLElement, url: string, options: RequestOptions = {}): Promise<Response> {
-  let request = requests.get(el)
-  const [promise, resolve, reject] = makeDeferred()
-
-  if (request) {
-    request.controller.abort()
-    request.controller = makeAbortController()
-  } else {
-    el.dispatchEvent(new CustomEvent('loadstart'))
-    request = {controller: makeAbortController(), promise, resolve, reject}
-    requests.set(el, request)
-  }
-
-  options.signal = request.controller.signal
-
+async function fetchWithNetworkEvents(el: Element, url: string, options: RequestOptions): Promise<Response> {
   try {
     const response = await fetch(url, options)
     el.dispatchEvent(new CustomEvent('load'))
     el.dispatchEvent(new CustomEvent('loadend'))
-
-    requests.delete(el)
-    request.resolve(response)
-
     return response
   } catch (error) {
     if (error.name !== 'AbortError') {
       el.dispatchEvent(new CustomEvent('error'))
       el.dispatchEvent(new CustomEvent('loadend'))
-
-      requests.delete(el)
-      request.reject(error)
     }
+    throw error
   }
-
-  return request.promise
 }
 
 async function check(autoCheckElement: AutoCheckElement) {
@@ -174,8 +139,21 @@ async function check(autoCheckElement: AutoCheckElement) {
     input.setCustomValidity('Verifying…')
   }
 
+  if (state.controller) {
+    state.controller.abort()
+  } else {
+    autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
+  }
+
+  state.controller = makeAbortController()
+
   try {
-    const response = await slidingPromiseFetch(autoCheckElement, src, {body, method: 'POST'})
+    const response = await fetchWithNetworkEvents(autoCheckElement, src, {
+      signal: state.controller.signal,
+      method: 'POST',
+      body
+    })
+
     if (response.status === 200) {
       if (autoCheckElement.required) {
         input.setCustomValidity('')
@@ -188,8 +166,9 @@ async function check(autoCheckElement: AutoCheckElement) {
       input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
     }
   } catch (error) {
-    // We've caught the network error here but don't need to handle it since the `slidingPromiseFetch` function has dispatched the events needed.
+    // Network and abort errors handled already.
   } finally {
+    state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   }
 }
