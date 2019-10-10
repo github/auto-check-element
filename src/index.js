@@ -12,23 +12,16 @@ const states = new WeakMap<AutoCheckElement, State>()
 const requests = new WeakMap()
 
 export default class AutoCheckElement extends HTMLElement {
-  constructor() {
-    super()
-    states.set(this, {
-      check: debounce(check.bind(null, this), 300),
-      request: null
-    })
-  }
-
   connectedCallback() {
     const input = this.input
     if (!input) return
 
-    const state = states.get(this)
-    if (!state) return
+    const checker = debounce(check.bind(null, this), 300)
+    const state = {check: checker, request: null}
+    states.set(this, state)
 
-    input.addEventListener('change', state.check)
-    input.addEventListener('input', state.check)
+    input.addEventListener('change', checker)
+    input.addEventListener('input', checker)
     input.autocomplete = 'off'
     input.spellcheck = false
   }
@@ -39,6 +32,7 @@ export default class AutoCheckElement extends HTMLElement {
 
     const state = states.get(this)
     if (!state) return
+    states.delete(this)
 
     input.removeEventListener('change', state.check)
     input.removeEventListener('input', state.check)
