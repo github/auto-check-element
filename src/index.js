@@ -2,25 +2,33 @@
 
 import debounce from './debounce'
 
+type State = {
+  check: Event => mixed,
+  request: ?Request
+}
+
 const previousValues = new WeakMap()
-const checkFunctions = new WeakMap<AutoCheckElement, (Event) => mixed>()
+const states = new WeakMap<AutoCheckElement, State>()
 const requests = new WeakMap()
 
 export default class AutoCheckElement extends HTMLElement {
   constructor() {
     super()
-    checkFunctions.set(this, debounce(check.bind(null, this), 300))
+    states.set(this, {
+      check: debounce(check.bind(null, this), 300),
+      request: null
+    })
   }
 
   connectedCallback() {
     const input = this.input
     if (!input) return
 
-    const checkFunction = checkFunctions.get(this)
-    if (!checkFunction) return
+    const state = states.get(this)
+    if (!state) return
 
-    input.addEventListener('change', checkFunction)
-    input.addEventListener('input', checkFunction)
+    input.addEventListener('change', state.check)
+    input.addEventListener('input', state.check)
     input.autocomplete = 'off'
     input.spellcheck = false
   }
@@ -29,11 +37,11 @@ export default class AutoCheckElement extends HTMLElement {
     const input = this.input
     if (!input) return
 
-    const checkFunction = checkFunctions.get(this)
-    if (!checkFunction) return
+    const state = states.get(this)
+    if (!state) return
 
-    input.removeEventListener('change', checkFunction)
-    input.removeEventListener('input', checkFunction)
+    input.removeEventListener('change', state.check)
+    input.removeEventListener('input', state.check)
     input.setCustomValidity('')
   }
 
