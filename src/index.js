@@ -21,6 +21,8 @@ export default class AutoCheckElement extends HTMLElement {
     const state = {check: checker, controller: null, previousValue: null}
     states.set(this, state)
 
+    input.addEventListener('change', setLoadingState)
+    input.addEventListener('input', setLoadingState)
     input.addEventListener('change', checker)
     input.addEventListener('input', checker)
     input.autocomplete = 'off'
@@ -35,6 +37,8 @@ export default class AutoCheckElement extends HTMLElement {
     if (!state) return
     states.delete(this)
 
+    input.removeEventListener('change', setLoadingState)
+    input.removeEventListener('input', setLoadingState)
     input.removeEventListener('change', state.check)
     input.removeEventListener('input', state.check)
     input.setCustomValidity('')
@@ -91,6 +95,16 @@ export default class AutoCheckElement extends HTMLElement {
   }
 }
 
+function setLoadingState(event: Event) {
+  const input = event.currentTarget
+  if (!(input instanceof HTMLInputElement)) return
+
+  const autoCheckElement = input.closest('auto-check')
+  if (autoCheckElement instanceof AutoCheckElement && autoCheckElement.required) {
+    input.setCustomValidity('Verifying…')
+  }
+}
+
 function makeAbortController() {
   if ('AbortController' in window) {
     return new AbortController()
@@ -114,19 +128,21 @@ async function fetchWithNetworkEvents(el: Element, url: string, options: Request
 }
 
 async function check(autoCheckElement: AutoCheckElement) {
-  const src = autoCheckElement.src
-  if (!src) {
-    throw new Error('missing src')
-  }
-  const csrf = autoCheckElement.csrf
-  if (!csrf) {
-    throw new Error('missing csrf')
-  }
   const input = autoCheckElement.input
-  if (!input) return
+  if (!input) {
+    return
+  }
 
+  const src = autoCheckElement.src
+  const csrf = autoCheckElement.csrf
   const state = states.get(autoCheckElement)
-  if (!state) return
+
+  if (!src || !csrf || !state) {
+    if (autoCheckElement.required) {
+      input.setCustomValidity('')
+    }
+    return
+  }
 
   const body = new FormData()
   body.append('authenticity_token', csrf)
@@ -146,6 +162,9 @@ async function check(autoCheckElement: AutoCheckElement) {
   )
 
   if (!input.value.trim()) {
+    if (autoCheckElement.required) {
+      input.setCustomValidity('')
+    }
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
