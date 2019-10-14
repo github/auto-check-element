@@ -42,8 +42,7 @@ describe('auto-check element', function() {
 
     it('emits a send event on change', function(done) {
       const input = document.querySelector('input')
-      input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
+      triggerChange(input, 'hub')
       input.addEventListener('auto-check-send', () => {
         done()
       })
@@ -51,8 +50,7 @@ describe('auto-check element', function() {
 
     it('emits a success event when server returns a non error response', function(done) {
       const input = document.querySelector('input')
-      input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
+      triggerChange(input, 'hub')
       input.addEventListener('auto-check-success', () => {
         done()
       })
@@ -61,8 +59,7 @@ describe('auto-check element', function() {
     it('emits a success event with message when server returns a non error response', function() {
       return new Promise(resolve => {
         const input = document.querySelector('input')
-        input.value = 'hub'
-        input.dispatchEvent(new InputEvent('change'))
+        triggerChange(input, 'hub')
         input.addEventListener('auto-check-success', async event => {
           resolve(await event.detail.response.text())
         })
@@ -76,8 +73,7 @@ describe('auto-check element', function() {
         const autoCheck = document.querySelector('auto-check')
         const input = document.querySelector('input')
         autoCheck.src = '/fail'
-        input.value = 'hub'
-        input.dispatchEvent(new InputEvent('change'))
+        triggerChange(input, 'hub')
         input.addEventListener('auto-check-error', async () => {
           resolve(await event.detail.response.text())
         })
@@ -92,8 +88,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       return new Promise(resolve => {
         autoCheck.src = '/fail'
-        input.value = 'hub'
-        input.dispatchEvent(new InputEvent('change'))
+        triggerChange(input, 'hub')
         input.addEventListener('auto-check-error', event => {
           event.detail.setValidity('A custom error')
           resolve()
@@ -110,8 +105,7 @@ describe('auto-check element', function() {
       const input = document.querySelector('input')
       return new Promise(resolve => {
         autoCheck.src = '/fail'
-        input.value = 'hub'
-        input.dispatchEvent(new InputEvent('change'))
+        triggerChange(input, 'hub')
         input.addEventListener('auto-check-send', event => {
           event.detail.setValidity('Checking with server')
           resolve()
@@ -130,8 +124,7 @@ describe('auto-check element', function() {
     it('sets input as invalid while the check request is inflight', function() {
       document.querySelector('auto-check').required = true
       const input = document.querySelector('input')
-      input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
+      triggerChange(input, 'hub')
       input.addEventListener('auto-check-loadstart', () => {
         assert.isFalse(document.querySelector('input').checkValidity())
       })
@@ -142,8 +135,7 @@ describe('auto-check element', function() {
       autoCheck.required = true
       autoCheck.src = '/fail'
       const input = document.querySelector('input')
-      input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
+      triggerChange(input, 'hub')
       input.addEventListener('auto-check-complete', () => {
         assert.isFalse(document.querySelector('input').checkValidity())
         done()
@@ -154,8 +146,7 @@ describe('auto-check element', function() {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       const input = document.querySelector('input')
-      input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
+      triggerChange(input, 'hub')
       input.addEventListener('auto-check-complete', () => {
         assert.isTrue(document.querySelector('input').checkValidity())
         done()
@@ -177,8 +168,7 @@ describe('auto-check element', function() {
 
     it('emits a complete event at the end of the lifecycle', function(done) {
       const input = document.querySelector('input')
-      input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
+      triggerChange(input, 'hub')
       input.addEventListener('auto-check-complete', () => {
         done()
       })
@@ -207,8 +197,7 @@ describe('auto-check element', function() {
         const autoCheck = document.querySelector('auto-check')
         const input = document.querySelector('input')
         autoCheck.src = '/plaintext'
-        input.value = 'hub'
-        input.dispatchEvent(new InputEvent('change'))
+        triggerChange(input, 'hub')
         input.addEventListener('auto-check-success', async event => {
           resolve(await event.detail.response.text())
         })
@@ -223,8 +212,7 @@ describe('auto-check element', function() {
           const autoCheck = document.querySelector('auto-check')
           const input = document.querySelector('input')
           autoCheck.src = '/fail'
-          input.value = 'hub'
-          input.dispatchEvent(new InputEvent('change'))
+          triggerChange(input, 'hub')
           input.addEventListener('auto-check-error', event => {
             resolve(event.detail.response.headers.get('Content-Type'))
           })
@@ -235,3 +223,8 @@ describe('auto-check element', function() {
     })
   })
 })
+
+function triggerChange(input, value) {
+  input.value = value
+  return input.dispatchEvent(new InputEvent('change'))
+}
