@@ -87,8 +87,28 @@ describe('auto-check element', function() {
         })
       })
       await error
+      await once(input, 'auto-check-complete')
       assert(!input.validity.valid)
       assert.equal('A custom error', input.validationMessage)
+    })
+
+    it('uses the server response as the error message', async function() {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.src = '/fail'
+      autoCheck.required = true
+      const input = document.querySelector('input')
+      const error = new Promise(resolve => {
+        triggerChange(input, 'hub')
+        input.addEventListener('auto-check-error', event => {
+          const {response, setValidity} = event.detail
+          setValidity(response.json().then(obj => obj.text))
+          resolve()
+        })
+      })
+      await error
+      await once(input, 'auto-check-complete')
+      assert(!input.validity.valid)
+      assert.equal('This is a error', input.validationMessage)
     })
 
     it('customizes the in-flight message', async function() {

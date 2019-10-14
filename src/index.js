@@ -160,7 +160,7 @@ async function check(autoCheckElement: AutoCheckElement) {
       method: 'POST',
       body
     })
-    processResponse(response, input, autoCheckElement.required)
+    await processResponse(response, input, autoCheckElement.required)
     state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   } catch (error) {
@@ -171,7 +171,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 }
 
-function processResponse(response: Response, input: HTMLInputElement, required: boolean) {
+async function processResponse(response: Response, input: HTMLInputElement, required: boolean) {
   if (response.status === 200) {
     if (required) {
       input.setCustomValidity('')
@@ -187,8 +187,8 @@ function processResponse(response: Response, input: HTMLInputElement, required: 
     return
   }
 
-  let message = 'Input is not valid'
-  const setValidity = text => (message = text)
+  const messages = []
+  const setValidity = result => messages.push(result)
   input.dispatchEvent(
     new CustomEvent('auto-check-error', {
       bubbles: true,
@@ -198,9 +198,10 @@ function processResponse(response: Response, input: HTMLInputElement, required: 
       }
     })
   )
-  if (required) {
-    input.setCustomValidity(message)
-  }
+
+  if (!required) return
+  const message = messages.length ? await Promise.race(messages) : 'Input is not valid'
+  input.setCustomValidity(message)
 }
 
 if (!window.customElements.get('auto-check')) {

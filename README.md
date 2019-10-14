@@ -23,9 +23,10 @@ import '@github/auto-check-element'
 Provide a URL and a CSRF token and the autocheck component will show validation confirmations and validation errors.
 
 The endpoint should respond to POST requests with:
- - a 200 HTTP status code if the provided value if valid.
- - a 422 HTTP status code if the provided value is invalid.
- - a optional error message in the body and a `Content-Type` header with a value of `text/html; fragment`.
+
+- a 200 HTTP status code if the provided value if valid.
+- a 422 HTTP status code if the provided value is invalid.
+- a optional error message in the body and a `Content-Type` header with a value of `text/html; fragment`.
 
 ## Events
 
@@ -62,10 +63,9 @@ input.addEventListener('auto-check-success', async function(event) {
   console.log('Validation passed', message)
 })
 input.addEventListener('auto-check-error', function(event) {
-  // Extract text response and invalidate the input with the custom message.
-  const message = await event.detail.response.text()
-  event.detail.setValidity(message)
-  console.log('Validation failed', message)
+  // Asynchronously extract text response and invalidate the input.
+  const {response, setValidity} = event.detail
+  setValidity(response.text())
 })
 input.addEventListener('auto-check-complete', function(event) {
   console.log('Validation complete', event)
