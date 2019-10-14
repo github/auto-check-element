@@ -160,28 +160,7 @@ async function check(autoCheckElement: AutoCheckElement) {
       method: 'POST',
       body
     })
-
-    if (response.status === 200) {
-      if (autoCheckElement.required) {
-        input.setCustomValidity('')
-      }
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
-    } else {
-      let message = 'Input is not valid'
-      const setValidity = text => (message = text)
-      input.dispatchEvent(
-        new CustomEvent('auto-check-error', {
-          bubbles: true,
-          detail: {
-            response: response.clone(),
-            setValidity
-          }
-        })
-      )
-      if (autoCheckElement.required) {
-        input.setCustomValidity(message)
-      }
-    }
+    processResponse(response, input, autoCheckElement.required)
     state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   } catch (error) {
@@ -189,6 +168,38 @@ async function check(autoCheckElement: AutoCheckElement) {
       state.controller = null
       input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     }
+  }
+}
+
+function processResponse(response: Response, input: HTMLInputElement, required: boolean) {
+  if (response.status === 200) {
+    if (required) {
+      input.setCustomValidity('')
+    }
+    input.dispatchEvent(
+      new CustomEvent('auto-check-success', {
+        bubbles: true,
+        detail: {
+          response: response.clone()
+        }
+      })
+    )
+    return
+  }
+
+  let message = 'Input is not valid'
+  const setValidity = text => (message = text)
+  input.dispatchEvent(
+    new CustomEvent('auto-check-error', {
+      bubbles: true,
+      detail: {
+        response: response.clone(),
+        setValidity
+      }
+    })
+  )
+  if (required) {
+    input.setCustomValidity(message)
   }
 }
 
