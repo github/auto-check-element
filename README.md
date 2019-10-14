@@ -53,6 +53,9 @@ input.addEventListener('auto-check-send', function(event) {
   console.log('Adding to FormData before network request is sent.')
   const {body} = event.detail
   body.append('custom_form_data', 'value')
+
+  // Invalidate input while network request is live.
+  event.detail.setValidity('Checking with server…')
 })
 input.addEventListener('auto-check-success', async function(event) {
   const message = await event.detail.response.text()

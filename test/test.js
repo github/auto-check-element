@@ -104,6 +104,24 @@ describe('auto-check element', function() {
       })
     })
 
+    it('customizes the in-flight message', function() {
+      const autoCheck = document.querySelector('auto-check')
+      autoCheck.required = true
+      const input = document.querySelector('input')
+      return new Promise(resolve => {
+        autoCheck.src = '/fail'
+        input.value = 'hub'
+        input.dispatchEvent(new InputEvent('change'))
+        input.addEventListener('auto-check-send', event => {
+          event.detail.setValidity('Checking with server')
+          resolve()
+        })
+      }).then(() => {
+        assert(!input.validity.valid)
+        assert.equal('Checking with server', input.validationMessage)
+      })
+    })
+
     it('sets input as invalid if input is required and not filled in', function() {
       document.querySelector('auto-check').required = true
       assert.isFalse(document.querySelector('input').checkValidity())
