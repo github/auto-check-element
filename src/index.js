@@ -149,6 +149,7 @@ async function check(autoCheckElement: AutoCheckElement) {
 
   try {
     const response = await fetchWithNetworkEvents(autoCheckElement, src, {
+      credentials: 'same-origin',
       signal: state.controller.signal,
       method: 'POST',
       body
