@@ -59,7 +59,9 @@ input.addEventListener('auto-check-success', async function(event) {
   console.log('Validation passed', message)
 })
 input.addEventListener('auto-check-error', function(event) {
+  // Extract text response and invalidate the input with the custom message.
   const message = await event.detail.response.text()
+  event.detail.setValidity(message)
   console.log('Validation failed', message)
 })
 input.addEventListener('auto-check-complete', function(event) {
