@@ -160,10 +160,21 @@ async function check(autoCheckElement: AutoCheckElement) {
       }
       input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
     } else {
+      let message = 'Input is not valid'
+      const setValidity = text => (message = text)
+
+      input.dispatchEvent(
+        new CustomEvent('auto-check-error', {
+          bubbles: true,
+          detail: {
+            response: response.clone(),
+            setValidity
+          }
+        })
+      )
       if (autoCheckElement.required) {
-        input.setCustomValidity('Input is not valid')
+        input.setCustomValidity(message)
       }
-      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
     }
     state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))

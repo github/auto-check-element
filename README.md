@@ -54,12 +54,12 @@ input.addEventListener('auto-check-send', function(event) {
   const {body} = event.detail
   body.append('custom_form_data', 'value')
 })
-input.addEventListener('auto-check-success', function(event) {
-  const {message} = event.detail
+input.addEventListener('auto-check-success', async function(event) {
+  const message = await event.detail.response.text()
   console.log('Validation passed', message)
 })
 input.addEventListener('auto-check-error', function(event) {
-  const {message} = event.detail
+  const message = await event.detail.response.text()
   console.log('Validation failed', message)
 })
 input.addEventListener('auto-check-complete', function(event) {
