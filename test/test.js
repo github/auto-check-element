@@ -56,7 +56,7 @@ describe('auto-check element', function() {
       })
     })
 
-    it('emits  success event with message when server returns a non error response', async function() {
+    it('emits a success event with message when server returns a non error response', async function() {
       const input = document.querySelector('input')
       triggerChange(input, 'hub')
       const event = await once(input, 'auto-check-success')
@@ -165,7 +165,7 @@ describe('auto-check element', function() {
       })
     })
 
-    it("doesn't set input as invalid the `required` attribute isn't set", function(done) {
+    it('skips validation if required attribute is not present', function(done) {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.src = '/fail'
       const input = document.querySelector('input')
