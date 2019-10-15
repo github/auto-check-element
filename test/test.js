@@ -103,7 +103,7 @@ describe('auto-check element', function() {
     })
   })
 
-  describe('requesting server results', function() {
+  describe('network lifecycle events', function() {
     let checker
     let input
 
@@ -125,25 +125,64 @@ describe('auto-check element', function() {
       input = null
     })
 
-    it('emits send event on input', function(done) {
+    it('emits network events in order', async function() {
+      const events = []
+      const track = event => events.push(event.type)
+
+      checker.addEventListener('loadstart', track)
+      checker.addEventListener('load', track)
+      checker.addEventListener('error', track)
+      checker.addEventListener('loadend', track)
+
+      const completed = Promise.all([once(checker, 'loadstart'), once(checker, 'load'), once(checker, 'loadend')])
+      triggerChange(input, 'hub')
+      await completed
+
+      assert.deepEqual(['loadstart', 'load', 'loadend'], events)
+    })
+  })
+
+  describe('auto-check lifecycle events', function() {
+    let checker
+    let input
+
+    beforeEach(function() {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check csrf="foo" src="/success">
+          <input>
+        </auto-check>`
+      document.body.append(container)
+
+      checker = document.querySelector('auto-check')
+      input = checker.querySelector('input')
+    })
+
+    afterEach(function() {
+      document.body.innerHTML = ''
+      checker = null
+      input = null
+    })
+
+    it('emits auto-check-send on input', function(done) {
       input.addEventListener('auto-check-send', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
     })
 
-    it('emits send event on change', function(done) {
+    it('emits auto-check-send on change', function(done) {
       input.addEventListener('auto-check-send', () => done())
       triggerChange(input, 'hub')
     })
 
-    it('emits success event when server responds with 200 OK', async function() {
+    it('emits auto-check-success when server responds with 200 OK', async function() {
       triggerChange(input, 'hub')
       const event = await once(input, 'auto-check-success')
       const result = await event.detail.response.text()
       assert.equal('This is a warning', result)
     })
 
-    it('emits error event when server returns an error response', async function() {
+    it('emits auto-check-error event when server returns an error response', async function() {
       checker.src = '/fail'
       triggerChange(input, 'hub')
       const event = await once(input, 'auto-check-error')
@@ -151,12 +190,12 @@ describe('auto-check element', function() {
       assert.equal('This is an error', result)
     })
 
-    it('emits complete event at the end of the lifecycle', function(done) {
+    it('emits auto-check-complete event at the end of the lifecycle', function(done) {
       input.addEventListener('auto-check-complete', () => done())
       triggerChange(input, 'hub')
     })
 
-    it('emits send event before checking if there is a duplicate request', function(done) {
+    it('emits auto-check-send event before checking if there is a duplicate request', function(done) {
       let counter = 2
       input.addEventListener('auto-check-send', () => {
         if (counter === 2) {
