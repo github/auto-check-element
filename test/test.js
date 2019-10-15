@@ -31,41 +31,35 @@ describe('auto-check element', function() {
       document.body.innerHTML = ''
     })
 
-    it('emits a send event on input', function(done) {
+    it('emits send event on input', function(done) {
       const input = document.querySelector('auto-check input')
       input.addEventListener('auto-check-send', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
     })
 
-    it('emits a send event on change', function(done) {
+    it('emits send event on change', function(done) {
       const input = document.querySelector('auto-check input')
       input.addEventListener('auto-check-send', () => done())
       triggerChange(input, 'hub')
     })
 
-    it('emits a success event when server returns a non error response', function(done) {
-      const input = document.querySelector('auto-check input')
-      input.addEventListener('auto-check-success', () => done())
-      triggerChange(input, 'hub')
-    })
-
-    it('emits a success event with message when server returns a non error response', async function() {
+    it('emits success event when server responds with 200 OK', async function() {
       const input = document.querySelector('auto-check input')
       triggerChange(input, 'hub')
       const event = await once(input, 'auto-check-success')
       const result = await event.detail.response.text()
-      assert.deepEqual('{"text": "This is a warning"}', result)
+      assert.equal('This is a warning', result)
     })
 
-    it('emits a error event when server returns a error response', async function() {
+    it('emits error event when server returns an error response', async function() {
       const autoCheck = document.querySelector('auto-check')
       const input = autoCheck.querySelector('input')
       autoCheck.src = '/fail'
       triggerChange(input, 'hub')
       const event = await once(input, 'auto-check-error')
       const result = await event.detail.response.text()
-      assert.deepEqual('{"text": "This is a error"}', result)
+      assert.equal('This is an error', result)
     })
 
     it('customizes the error message', async function() {
@@ -102,13 +96,13 @@ describe('auto-check element', function() {
       assert.equal('Checking with server', input.validationMessage)
     })
 
-    it('sets input as invalid if input is required and not filled in', function() {
+    it('sets required input as invalid when empty', function() {
       const checker = document.querySelector('auto-check')
       checker.required = true
       assert.isFalse(checker.querySelector('input').checkValidity())
     })
 
-    it('sets input as invalid while the check request is in-flight', async function() {
+    it('sets required input as invalid while the request is in-flight', async function() {
       const checker = document.querySelector('auto-check')
       checker.required = true
       const input = checker.querySelector('input')
@@ -117,7 +111,7 @@ describe('auto-check element', function() {
       assert.isFalse(input.checkValidity())
     })
 
-    it('sets input as invalid if the check request comes back with a error', async function() {
+    it('sets required input as invalid on failed server response', async function() {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       autoCheck.src = '/fail'
@@ -127,7 +121,7 @@ describe('auto-check element', function() {
       assert.isFalse(input.checkValidity())
     })
 
-    it('sets input as valid if the check request comes back with a success', async function() {
+    it('sets required input as valid on successful server response', async function() {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       const input = autoCheck.querySelector('input')
@@ -147,13 +141,13 @@ describe('auto-check element', function() {
       assert.isTrue(input.checkValidity())
     })
 
-    it('emits a complete event at the end of the lifecycle', function(done) {
+    it('emits complete event at the end of the lifecycle', function(done) {
       const input = document.querySelector('auto-check input')
       input.addEventListener('auto-check-complete', () => done())
       triggerChange(input, 'hub')
     })
 
-    it('emits a send event before checking if there is a duplicate request', function(done) {
+    it('emits send event before checking if there is a duplicate request', function(done) {
       const input = document.querySelector('auto-check input')
 
       let counter = 2
@@ -168,28 +162,6 @@ describe('auto-check element', function() {
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
       input.dispatchEvent(new InputEvent('change'))
-    })
-
-    it('handles plain text responses', async function() {
-      const autoCheck = document.querySelector('auto-check')
-      const input = autoCheck.querySelector('input')
-      autoCheck.src = '/plaintext'
-      triggerChange(input, 'hub')
-      const event = await once(input, 'auto-check-success')
-      const result = await event.detail.response.text()
-      assert.deepEqual('This is a warning', result)
-    })
-
-    describe('`auto-check-error` event', async function() {
-      it('includes `Content-Type` header in event payload', async function() {
-        const autoCheck = document.querySelector('auto-check')
-        const input = document.querySelector('input')
-        autoCheck.src = '/fail'
-        triggerChange(input, 'hub')
-        const event = await once(input, 'auto-check-error')
-        const contentType = event.detail.response.headers.get('Content-Type')
-        assert.equal('application/json', contentType)
-      })
     })
   })
 })

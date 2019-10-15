@@ -1,17 +1,11 @@
 function checker(request, response, next) {
-  if (request.method === 'POST' && request.url.startsWith('/plaintext')) {
-    response.writeHead(200)
-    response.end('This is a warning')
-    return
-  } else if (request.method === 'POST' && request.url.startsWith('/fail')) {
-    response.setHeader('Content-Type', 'application/json')
+  if (request.method === 'POST' && request.url.startsWith('/fail')) {
     response.writeHead(422)
-    response.end('{"text": "This is a error"}')
+    response.end('This is an error')
     return
   } else if (request.method === 'POST' && request.url.startsWith('/success')) {
-    response.setHeader('Content-Type', 'application/json')
     response.writeHead(200)
-    response.end('{"text": "This is a warning"}')
+    response.end('This is a warning')
     return
   }
   next()
