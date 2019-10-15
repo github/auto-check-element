@@ -82,10 +82,13 @@ input.addEventListener('auto-check-success', async function(event) {
 - `setValidity`: A function to provide a custom failure message on the input.
 
 ```js
-input.addEventListener('auto-check-error', function(event) {
-  // Asynchronously extract text response and provide a validation message for the input.
+input.addEventListener('auto-check-error', async function(event) {
   const {response, setValidity} = event.detail
-  setValidity(response.text())
+
+  setValidity('Validation failed')
+
+  const message = await response.text()
+  console.log('Validation failed', message)
 })
 ```
 
