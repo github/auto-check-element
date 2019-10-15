@@ -20,18 +20,19 @@ import '@github/auto-check-element'
 </auto-check>
 ```
 
-An `<auto-check>` element validates text input, as it's entered, with the provided URL and [CSRF][] token. The server endpoint should respond to POST requests with a 200 OK status if the provided value is valid. Any other error status response indicates the provided value is invalid.
+## Attributes
 
-The response body is passed to event listeners to allow the host application to display custom messaging near the input field.
-
-[CSRF]: https://en.wikipedia.org/wiki/Cross-site_request_forgery
+- `src` is the server endpoint that will receive POST requests. The posted form contains a `value` parameter containing the text input to validate. Responding with a 200 OK status indicates the provided value is valid. Any other error status response indicates the provided value is invalid.
+- `csrf` is the [CSRF][] token for the posted form. It's available in the request body as a `authenticity_token` form parameter.
+- `required` is a boolean attribute that requires the validation to succeed before the surrounding form may be submitted.
 
 ## Events
+
+### Network request lifecycle events
 
 ```js
 const check = document.querySelector('auto-check')
 
-// Network request lifecycle events.
 check.addEventListener('loadstart', function(event) {
   console.log('Network request started', event)
 })
@@ -44,31 +45,60 @@ check.addEventListener('load', function(event) {
 check.addEventListener('error', function(event) {
   console.log('Network request failed', event)
 })
+```
 
-// Auto-check result events.
+### Auto-check events
+
+**`auto-check-send`** is dispatched before the network request begins. In `event.detail` you can find:
+
+- `body`: The FormData request body to modify before the request is sent.
+- `setValidity`: A function to provide a custom validation message while the request is in-flight.
+
+
+```js
 const input = check.querySelector('input')
 
 input.addEventListener('auto-check-send', function(event) {
-  console.log('Adding to FormData before network request is sent.')
-  const {body} = event.detail
+  const {body, setValidity} = event.detail
   body.append('custom_form_data', 'value')
-
-  // Invalidate input while network request is live.
-  event.detail.setValidity('Checking with server…')
+  setValidity('Checking with server…')
 })
+```
+
+**`auto-check-success`** is dispatched when the server responds with 200 OK. In `event.detail` you can find:
+
+- `response`: The successful server [Response][]. Its body can be used for displaying server-provided messages.
+
+```js
 input.addEventListener('auto-check-success', async function(event) {
   const message = await event.detail.response.text()
   console.log('Validation passed', message)
 })
+```
+
+**`auto-check-error`** is dispatched when the server responds with a 400 or 500 range error status. In `event.detail` you can find:
+
+- `response`: The failed server [Response][]. Its body can be used for displaying server-provided messages.
+- `setValidity`: A function to provide a custom failure message on the input.
+
+```js
 input.addEventListener('auto-check-error', function(event) {
-  // Asynchronously extract text response and invalidate the input.
+  // Asynchronously extract text response and provide a validation message for the input.
   const {response, setValidity} = event.detail
   setValidity(response.text())
 })
+```
+
+**`auto-check-complete`** is dispatched after either the success or error events to indicate the end of the auto-check lifecycle. This is a convenient place for cleanup, like hiding progress spinners.
+
+```js
 input.addEventListener('auto-check-complete', function(event) {
   console.log('Validation complete', event)
 })
 ```
+
+[CSRF]: https://en.wikipedia.org/wiki/Cross-site_request_forgery
+[Response]: https://developer.mozilla.org/en-US/docs/Web/API/Response
 
 ## Browser support
 
