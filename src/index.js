@@ -160,7 +160,11 @@ async function check(autoCheckElement: AutoCheckElement) {
       method: 'POST',
       body
     })
-    processResponse(response, input, autoCheckElement.required)
+    if (response.status === 200) {
+      processSuccess(response, input, autoCheckElement.required)
+    } else {
+      processFailure(response, input, autoCheckElement.required)
+    }
     state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   } catch (error) {
@@ -171,22 +175,21 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 }
 
-function processResponse(response: Response, input: HTMLInputElement, required: boolean) {
-  if (response.status === 200) {
-    if (required) {
-      input.setCustomValidity('')
-    }
-    input.dispatchEvent(
-      new CustomEvent('auto-check-success', {
-        bubbles: true,
-        detail: {
-          response: response.clone()
-        }
-      })
-    )
-    return
+function processSuccess(response: Response, input: HTMLInputElement, required: boolean) {
+  if (required) {
+    input.setCustomValidity('')
   }
+  input.dispatchEvent(
+    new CustomEvent('auto-check-success', {
+      bubbles: true,
+      detail: {
+        response: response.clone()
+      }
+    })
+  )
+}
 
+function processFailure(response: Response, input: HTMLInputElement, required: boolean) {
   let message = 'Validation failed'
   const setValidity = text => (message = text)
   input.dispatchEvent(
