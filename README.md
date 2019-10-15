@@ -15,18 +15,16 @@ import '@github/auto-check-element'
 ```
 
 ```erb
-<auto-check src="/signup_check/username" csrf="<%= authenticity_token_for("/signup_check/username") %>">
- <input>
+<auto-check src="/signup-check/username" csrf="<%= authenticity_token_for("/signup-check/username") %>">
+  <input>
 </auto-check>
 ```
 
-Provide a URL and a CSRF token and the autocheck component will show validation confirmations and validation errors.
+An `<auto-check>` element validates text input, as it's entered, with the provided URL and [CSRF][] token. The server endpoint should respond to POST requests with a 200 OK status if the provided value is valid. Any other error status response indicates the provided value is invalid.
 
-The endpoint should respond to POST requests with:
+The response body is passed to event listeners to allow the host application to display custom messaging near the input field.
 
-- a 200 HTTP status code if the provided value if valid.
-- a 422 HTTP status code if the provided value is invalid.
-- a optional error message in the body and a `Content-Type` header with a value of `text/html; fragment`.
+[CSRF]: https://en.wikipedia.org/wiki/Cross-site_request_forgery
 
 ## Events
 
