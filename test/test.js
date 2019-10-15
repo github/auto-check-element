@@ -160,10 +160,8 @@ describe('auto-check element', function() {
 
     it('emits a complete event at the end of the lifecycle', function(done) {
       const input = document.querySelector('input')
+      input.addEventListener('auto-check-complete', () => done())
       triggerChange(input, 'hub')
-      input.addEventListener('auto-check-complete', () => {
-        done()
-      })
     })
 
     it('emits a send event before checking if there is a duplicate request', function(done) {
