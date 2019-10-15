@@ -52,7 +52,7 @@ check.addEventListener('error', function(event) {
 **`auto-check-send`** is dispatched before the network request begins. In `event.detail` you can find:
 
 - `body`: The FormData request body to modify before the request is sent.
-- `setValidity`: A function to provide a custom validation message while the request is in-flight.
+- `setValidity`: A function to provide a custom validation message while the request is in-flight. By default it is 'Verifying…'.
 
 
 ```js
@@ -79,7 +79,7 @@ input.addEventListener('auto-check-success', async function(event) {
 **`auto-check-error`** is dispatched when the server responds with a 400 or 500 range error status. In `event.detail` you can find:
 
 - `response`: The failed server [Response][]. Its body can be used for displaying server-provided messages.
-- `setValidity`: A function to provide a custom failure message on the input.
+- `setValidity`: A function to provide a custom failure message on the input. By default it is 'Validation failed'.
 
 ```js
 input.addEventListener('auto-check-error', async function(event) {
