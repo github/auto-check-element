@@ -22,7 +22,7 @@ describe('auto-check element', function() {
       const container = document.createElement('div')
       container.innerHTML = `
         <auto-check csrf="foo" src="/success">
-          <input />
+          <input>
         </auto-check>`
       document.body.append(container)
     })
@@ -33,27 +33,21 @@ describe('auto-check element', function() {
 
     it('emits a send event on input', function(done) {
       const input = document.querySelector('input')
+      input.addEventListener('auto-check-send', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
-      input.addEventListener('auto-check-send', () => {
-        done()
-      })
     })
 
     it('emits a send event on change', function(done) {
       const input = document.querySelector('input')
+      input.addEventListener('auto-check-send', () => done())
       triggerChange(input, 'hub')
-      input.addEventListener('auto-check-send', () => {
-        done()
-      })
     })
 
     it('emits a success event when server returns a non error response', function(done) {
       const input = document.querySelector('input')
+      input.addEventListener('auto-check-success', () => done())
       triggerChange(input, 'hub')
-      input.addEventListener('auto-check-success', () => {
-        done()
-      })
     })
 
     it('emits a success event with message when server returns a non error response', async function() {
@@ -80,11 +74,11 @@ describe('auto-check element', function() {
       autoCheck.required = true
       const input = document.querySelector('input')
       const error = new Promise(resolve => {
-        triggerChange(input, 'hub')
         input.addEventListener('auto-check-error', event => {
           event.detail.setValidity('A custom error')
           resolve()
         })
+        triggerChange(input, 'hub')
       })
       await error
       assert(!input.validity.valid)
@@ -97,11 +91,11 @@ describe('auto-check element', function() {
       autoCheck.required = true
       const input = document.querySelector('input')
       const send = new Promise(resolve => {
-        triggerChange(input, 'hub')
         input.addEventListener('auto-check-send', event => {
           event.detail.setValidity('Checking with server')
           resolve()
         })
+        triggerChange(input, 'hub')
       })
       await send
       assert(!input.validity.valid)
@@ -113,49 +107,43 @@ describe('auto-check element', function() {
       assert.isFalse(document.querySelector('input').checkValidity())
     })
 
-    it('sets input as invalid while the check request is inflight', function() {
-      document.querySelector('auto-check').required = true
-      const input = document.querySelector('input')
+    it('sets input as invalid while the check request is inflight', async function() {
+      const checker = document.querySelector('auto-check')
+      checker.required = true
+      const input = checker.querySelector('input')
       triggerChange(input, 'hub')
-      input.addEventListener('auto-check-loadstart', () => {
-        assert.isFalse(document.querySelector('input').checkValidity())
-      })
+      await once(checker, 'loadstart')
+      assert.isFalse(input.checkValidity())
     })
 
-    it('sets input as invalid if the check request comes back with a error', function(done) {
+    it('sets input as invalid if the check request comes back with a error', async function() {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       autoCheck.src = '/fail'
       const input = document.querySelector('input')
       triggerChange(input, 'hub')
-      input.addEventListener('auto-check-complete', () => {
-        assert.isFalse(document.querySelector('input').checkValidity())
-        done()
-      })
+      await once(input, 'auto-check-complete')
+      assert.isFalse(document.querySelector('input').checkValidity())
     })
 
-    it('sets input as valid if the check request comes back with a success', function(done) {
+    it('sets input as valid if the check request comes back with a success', async function() {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.required = true
       const input = document.querySelector('input')
       triggerChange(input, 'hub')
-      input.addEventListener('auto-check-complete', () => {
-        assert.isTrue(document.querySelector('input').checkValidity())
-        done()
-      })
+      await once(input, 'auto-check-complete')
+      assert.isTrue(document.querySelector('input').checkValidity())
     })
 
-    it('skips validation if required attribute is not present', function(done) {
+    it('skips validation if required attribute is not present', async function() {
       const autoCheck = document.querySelector('auto-check')
       autoCheck.src = '/fail'
       const input = document.querySelector('input')
       input.value = 'hub'
       assert.isTrue(document.querySelector('input').checkValidity())
       input.dispatchEvent(new InputEvent('change'))
-      input.addEventListener('auto-check-complete', () => {
-        assert.isTrue(document.querySelector('input').checkValidity())
-        done()
-      })
+      await once(input, 'auto-check-complete')
+      assert.isTrue(document.querySelector('input').checkValidity())
     })
 
     it('emits a complete event at the end of the lifecycle', function(done) {
