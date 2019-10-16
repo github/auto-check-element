@@ -128,7 +128,14 @@ async function check(autoCheckElement: AutoCheckElement) {
   if (id && id === state.previousValue) return
   state.previousValue = id
 
-  input.dispatchEvent(new CustomEvent('auto-check-send', {detail: {body}, bubbles: true}))
+  let message = 'Verifying…'
+  const setValidity = text => (message = text)
+  input.dispatchEvent(
+    new CustomEvent('auto-check-send', {
+      bubbles: true,
+      detail: {body, setValidity}
+    })
+  )
 
   if (!input.value.trim()) {
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
@@ -136,7 +143,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   if (autoCheckElement.required) {
-    input.setCustomValidity('Verifying…')
+    input.setCustomValidity(message)
   }
 
   if (state.controller) {
@@ -154,17 +161,10 @@ async function check(autoCheckElement: AutoCheckElement) {
       method: 'POST',
       body
     })
-
     if (response.status === 200) {
-      if (autoCheckElement.required) {
-        input.setCustomValidity('')
-      }
-      input.dispatchEvent(new CustomEvent('auto-check-success', {detail: {response: response.clone()}, bubbles: true}))
+      processSuccess(response, input, autoCheckElement.required)
     } else {
-      if (autoCheckElement.required) {
-        input.setCustomValidity('Input is not valid')
-      }
-      input.dispatchEvent(new CustomEvent('auto-check-error', {detail: {response: response.clone()}, bubbles: true}))
+      processFailure(response, input, autoCheckElement.required)
     }
     state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
@@ -173,6 +173,38 @@ async function check(autoCheckElement: AutoCheckElement) {
       state.controller = null
       input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     }
+  }
+}
+
+function processSuccess(response: Response, input: HTMLInputElement, required: boolean) {
+  if (required) {
+    input.setCustomValidity('')
+  }
+  input.dispatchEvent(
+    new CustomEvent('auto-check-success', {
+      bubbles: true,
+      detail: {
+        response: response.clone()
+      }
+    })
+  )
+}
+
+function processFailure(response: Response, input: HTMLInputElement, required: boolean) {
+  let message = 'Validation failed'
+  const setValidity = text => (message = text)
+  input.dispatchEvent(
+    new CustomEvent('auto-check-error', {
+      bubbles: true,
+      detail: {
+        response: response.clone(),
+        setValidity
+      }
+    })
+  )
+
+  if (required) {
+    input.setCustomValidity(message)
   }
 }
 
