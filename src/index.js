@@ -40,6 +40,18 @@ export default class AutoCheckElement extends HTMLElement {
     input.setCustomValidity('')
   }
 
+  attributeChangedCallback(name: string) {
+    if (name === 'required') {
+      const input = this.input
+      if (!input) return
+      input.required = this.required
+    }
+  }
+
+  static get observedAttributes(): Array<string> {
+    return ['required']
+  }
+
   get input(): ?HTMLInputElement {
     const input = this.querySelector('input')
     return input instanceof HTMLInputElement ? input : null
@@ -71,10 +83,6 @@ export default class AutoCheckElement extends HTMLElement {
   }
 
   set required(required: boolean) {
-    const input = this.input
-    if (!input) return
-
-    input.required = required
     if (required) {
       this.setAttribute('required', '')
     } else {

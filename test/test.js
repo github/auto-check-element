@@ -40,8 +40,7 @@ describe('auto-check element', function() {
     })
 
     it('invalidates empty input', function() {
-      // FIXME Must implement attributeChanged callback.
-      checker.required = true
+      assert.isTrue(input.hasAttribute('required'))
       assert.isFalse(input.checkValidity())
     })
 
