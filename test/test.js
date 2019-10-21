@@ -44,6 +44,13 @@ describe('auto-check element', function() {
       assert.isFalse(input.checkValidity())
     })
 
+    it('invalidates input on keypress', async function() {
+      const inputEvent = once(input, 'change')
+      triggerChange(input, 'hub')
+      await inputEvent
+      assert.isFalse(input.checkValidity())
+    })
+
     it('invalidates input request is in-flight', async function() {
       triggerChange(input, 'hub')
       await once(checker, 'loadstart')
