@@ -99,9 +99,18 @@ function setLoadingState(event: Event) {
   const input = event.currentTarget
   if (!(input instanceof HTMLInputElement)) return
 
+  let message = 'Verifying…'
+  const setValidity = text => (message = text)
+  input.dispatchEvent(
+    new CustomEvent('auto-check-loading', {
+      bubbles: true,
+      detail: {setValidity}
+    })
+  )
+
   const autoCheckElement = input.closest('auto-check')
   if (autoCheckElement instanceof AutoCheckElement && autoCheckElement.required) {
-    input.setCustomValidity('Verifying…')
+    input.setCustomValidity(message)
   }
 }
 
@@ -152,12 +161,10 @@ async function check(autoCheckElement: AutoCheckElement) {
   if (id && id === state.previousValue) return
   state.previousValue = id
 
-  let message = 'Verifying…'
-  const setValidity = text => (message = text)
   input.dispatchEvent(
     new CustomEvent('auto-check-send', {
       bubbles: true,
-      detail: {body, setValidity}
+      detail: {body}
     })
   )
 
@@ -167,10 +174,6 @@ async function check(autoCheckElement: AutoCheckElement) {
     }
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
-  }
-
-  if (autoCheckElement.required) {
-    input.setCustomValidity(message)
   }
 
   if (state.controller) {
