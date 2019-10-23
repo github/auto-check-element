@@ -73,7 +73,7 @@ describe('auto-check element', function() {
     it('customizes the in-flight message', async function() {
       checker.src = '/fail'
       const send = new Promise(resolve => {
-        input.addEventListener('auto-check-send', event => {
+        input.addEventListener('auto-check-loading', event => {
           event.detail.setValidity('Checking with server')
           resolve()
         })
@@ -170,14 +170,14 @@ describe('auto-check element', function() {
       input = null
     })
 
-    it('emits auto-check-send on input', function(done) {
-      input.addEventListener('auto-check-send', () => done())
+    it('emits auto-check-loading on input', function(done) {
+      input.addEventListener('auto-check-loading', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
     })
 
-    it('emits auto-check-send on change', function(done) {
-      input.addEventListener('auto-check-send', () => done())
+    it('emits auto-check-loading on change', function(done) {
+      input.addEventListener('auto-check-loading', () => done())
       triggerChange(input, 'hub')
     })
 
@@ -201,9 +201,9 @@ describe('auto-check element', function() {
       triggerChange(input, 'hub')
     })
 
-    it('emits auto-check-send event before checking if there is a duplicate request', function(done) {
+    it('emits auto-check-loading event before checking if there is a duplicate request', function(done) {
       let counter = 2
-      input.addEventListener('auto-check-send', () => {
+      input.addEventListener('auto-check-loading', () => {
         if (counter === 2) {
           done()
         } else {
