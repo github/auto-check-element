@@ -49,19 +49,31 @@ check.addEventListener('error', function(event) {
 
 ### Auto-check events
 
-**`auto-check-send`** is dispatched before the network request begins. In `event.detail` you can find:
+**`auto-check-input`** is dispatched on when there has been input in the element. In `event.detail` you can find:
 
-- `body`: The FormData request body to modify before the request is sent.
-- `setValidity`: A function to provide a custom validation message while the request is in-flight. By default it is 'Verifying…'.
+- `setValidity`: A function to provide a custom failure message on the input. By default it is 'Verifying…'.
 
 
 ```js
 const input = check.querySelector('input')
 
 input.addEventListener('auto-check-send', function(event) {
-  const {body, setValidity} = event.detail
+  const {setValidity} = event.detail
+  setValidity('Loading validation')
+})
+```
+
+**`auto-check-send`** is dispatched before the network request begins. In `event.detail` you can find:
+
+- `body`: The FormData request body to modify before the request is sent.
+
+
+```js
+const input = check.querySelector('input')
+
+input.addEventListener('auto-check-send', function(event) {
+  const {body} = event.detail
   body.append('custom_form_data', 'value')
-  setValidity('Checking with server…')
 })
 ```
 
