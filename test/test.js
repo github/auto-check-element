@@ -44,7 +44,7 @@ describe('auto-check element', function() {
       assert.isFalse(input.checkValidity())
     })
 
-    it('invalidates input on keypress', async function() {
+    it('invalidates the input element on keypress', async function() {
       const inputEvent = once(input, 'change')
       triggerChange(input, 'hub')
       await inputEvent
