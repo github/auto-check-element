@@ -170,6 +170,17 @@ describe('auto-check element', function() {
       input = null
     })
 
+    it('emits auto-check-send on input', function(done) {
+      input.addEventListener('auto-check-send', () => done())
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('input'))
+    })
+
+    it('emits auto-check-send on change', function(done) {
+      input.addEventListener('auto-check-send', () => done())
+      triggerChange(input, 'hub')
+    })
+
     it('emits auto-check-input on input', function(done) {
       input.addEventListener('auto-check-input', () => done())
       input.value = 'hub'
@@ -179,6 +190,12 @@ describe('auto-check element', function() {
     it('emits auto-check-input on change', function(done) {
       input.addEventListener('auto-check-input', () => done())
       triggerChange(input, 'hub')
+    })
+
+    it('emits auto-check-send 300 milliseconds after keypress', function(done) {
+      input.addEventListener('auto-check-send', () => done())
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('input'))
     })
 
     it('emits auto-check-success when server responds with 200 OK', async function() {
@@ -201,9 +218,9 @@ describe('auto-check element', function() {
       triggerChange(input, 'hub')
     })
 
-    it('emits auto-check-input event before checking if there is a duplicate request', function(done) {
+    it('emits auto-check-send event before checking if there is a duplicate request', function(done) {
       let counter = 2
-      input.addEventListener('auto-check-input', () => {
+      input.addEventListener('auto-check-send', () => {
         if (counter === 2) {
           done()
         } else {
