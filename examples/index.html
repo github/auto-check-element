@@ -44,16 +44,20 @@
         })
 
         form.addEventListener('auto-check-send', () => {
-          const {setValidity} = event.detail
-          setValidity('🔍 Checking validity...')
+          if (form.id === 'custom') {
+            const {setValidity} = event.detail
+            setValidity('🔍 Checking validity...')
+          }
           state.textContent = 'loading'
         })
         form.addEventListener('auto-check-success', event => {
           state.textContent = 'succeeded'
         })
         form.addEventListener('auto-check-error', event => {
-          const {setValidity} = event.detail
-          setValidity('🚫 Something went wrong.')
+          if (form.id === 'custom') {
+            const {setValidity} = event.detail
+            setValidity('🚫 Something went wrong.')
+          }
           state.textContent = 'error'
         })
         form.addEventListener('auto-check-complete', () => {
