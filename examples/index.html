@@ -2,62 +2,39 @@
 <html>
   <head>
     <title>&lt;auto-check&gt; element</title>
+    <style>auto-check {display: block;}</style>
   </head>
   <body>
     <h1>Simple form</h1>
+    <p>Input 422 for an error response.</p>
     <form>
-      <p>Input 422 for an error response.</p>
       <auto-check csrf="foo" src="/demo" required>
         <input autofocus name="foo" required>
         <code class="state"></code>
       </auto-check>
-      <button disabled>submit</button>
+      <button>submit</button>
     </form>
 
-    <h1>Form that handles JSON</h1>
-    <form>
-      <p>Input 422 for an error response.</p>
-      <auto-check csrf="foo" src="/json-demo" required>
+    <h1>Form that has custom validaty messages</h1>
+    <p>Input 422 for an error response.</p>
+    <form id="custom">
+      <auto-check csrf="foo" src="/demo" required>
         <input autofocus class="json" name="foo" required>
         <code class="state"></code>
       </auto-check>
-      <button disabled>submit</button>
+      <button>submit</button>
     </form>
 
     <script>
       let focusedInput
-      class FakeXMLHttpRequest {
-        abort() {
-          // Do nothing.
-        }
-        open(method, url) {
-          // Do nothing.
-        }
-        setRequestHeader(name, value) {
-          // Do nothing.
-        }
-        getResponseHeader(name) {
-          if (name === 'Content-Type' && focusedInput.classList.contains('json')) {
-            return 'application/json'
-          } else {
-            return 'plain/text'
-          }
-        }
-        send() {
-          const json = focusedInput.classList.contains('json')
-          if (focusedInput.value === '422') {
-            this.status = 422
-            this.responseText = json ? '{"text": "bad", "html": "<b>bad</b>"}' : 'bad'
-          } else {
-            this.status = 200
-            this.responseText = json ? '{"text": "success", "html": "<b>success</b>"}' : 'success'
-          }
-          setTimeout(this.onload.bind(this), 0)
-        }
+      const nativeFetch = window.fetch
+      const fakeFetch = function(_, options) {
+        const path = `https://httpbin.org/status/${options.body.get('value') === '422' ? '422' : '200'}`
+        return nativeFetch(path, options)
       }
-      window.XMLHttpRequest = FakeXMLHttpRequest
+      window.fetch = fakeFetch
 
-      for (const form of document.querySelectorAll('form')) {
+      for (const form of document.forms) {
         const formInput = form.querySelector('input')
         const button = form.querySelector('button')
         const state = form.querySelector('.state')
@@ -67,20 +44,20 @@
         })
 
         form.addEventListener('auto-check-send', () => {
+          const {setValidity} = event.detail
+          setValidity('🔍 Checking validity...')
           state.textContent = 'loading'
-          button.disabled = true
         })
         form.addEventListener('auto-check-success', event => {
-          if (focusedInput.classList.contains('json')) {
-            state.innerHTML = JSON.parse(event.detail.message).html
-          } else {
-            state.textContent = event.detail.message
-          }
-          button.disabled = false
+          state.textContent = 'succeeded'
         })
-        form.addEventListener('auto-check-error', () => {
+        form.addEventListener('auto-check-error', event => {
+          const {setValidity} = event.detail
+          setValidity('🚫 Something went wrong.')
           state.textContent = 'error'
-          button.disabled = true
+        })
+        form.addEventListener('auto-check-complete', () => {
+          if (state.textContent === 'loading') state.textContent = ''
         })
       }
     </script>
