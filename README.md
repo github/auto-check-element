@@ -57,7 +57,7 @@ check.addEventListener('error', function(event) {
 ```js
 const input = check.querySelector('input')
 
-input.addEventListener('auto-check-send', function(event) {
+input.addEventListener('auto-check-input', function(event) {
   const {setValidity} = event.detail
   setValidity('Loading validation')
 })
