@@ -51,6 +51,24 @@ describe('auto-check element', function() {
       assert.isFalse(input.checkValidity())
     })
 
+    it('validates the input element if there is no `src` attribute', async function() {
+      checker.removeAttribute('src')
+      const completeEvent = once(checker, 'auto-check-complete')
+      triggerChange(input, 'hub')
+      await completeEvent
+      assert.isTrue(input.checkValidity())
+      checker.src = '/success'
+    })
+
+    it('validates the input element if there is no `csrf` attribute', async function() {
+      checker.removeAttribute('csrf')
+      const completeEvent = once(checker, 'auto-check-complete')
+      triggerChange(input, 'hub')
+      await completeEvent
+      assert.isTrue(input.checkValidity())
+      checker.csrf = 'foo'
+    })
+
     it('invalidates input request is in-flight', async function() {
       triggerChange(input, 'hub')
       await once(checker, 'loadstart')
