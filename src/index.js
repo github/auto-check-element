@@ -102,7 +102,7 @@ function setLoadingState(event: Event) {
   let message = 'Verifying…'
   const setValidity = text => (message = text)
   input.dispatchEvent(
-    new CustomEvent('auto-check-input', {
+    new CustomEvent('auto-check-start', {
       bubbles: true,
       detail: {setValidity}
     })

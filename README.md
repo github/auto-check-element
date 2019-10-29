@@ -49,7 +49,7 @@ check.addEventListener('error', function(event) {
 
 ### Auto-check events
 
-**`auto-check-input`** is dispatched on when there has been input in the element. In `event.detail` you can find:
+**`auto-check-start`** is dispatched on when there has been input in the element. In `event.detail` you can find:
 
 - `setValidity`: A function to provide a custom failure message on the input. By default it is 'Verifying…'.
 
@@ -57,7 +57,7 @@ check.addEventListener('error', function(event) {
 ```js
 const input = check.querySelector('input')
 
-input.addEventListener('auto-check-input', function(event) {
+input.addEventListener('auto-check-start', function(event) {
   const {setValidity} = event.detail
   setValidity('Loading validation')
 })

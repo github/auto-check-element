@@ -73,7 +73,7 @@ describe('auto-check element', function() {
     it('customizes the in-flight message', async function() {
       checker.src = '/fail'
       const send = new Promise(resolve => {
-        input.addEventListener('auto-check-input', event => {
+        input.addEventListener('auto-check-start', event => {
           event.detail.setValidity('Checking with server')
           resolve()
         })
@@ -181,14 +181,14 @@ describe('auto-check element', function() {
       triggerChange(input, 'hub')
     })
 
-    it('emits auto-check-input on input', function(done) {
-      input.addEventListener('auto-check-input', () => done())
+    it('emits auto-check-start on input', function(done) {
+      input.addEventListener('auto-check-start', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
     })
 
-    it('emits auto-check-input on change', function(done) {
-      input.addEventListener('auto-check-input', () => done())
+    it('emits auto-check-start on change', function(done) {
+      input.addEventListener('auto-check-start', () => done())
       triggerChange(input, 'hub')
     })
 
