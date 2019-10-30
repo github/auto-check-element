@@ -30,21 +30,22 @@ import '@github/auto-check-element'
 
 ### Network request lifecycle events
 
+Request lifecycle events are dispatched on the `<auto-check>` element. These events do not bubble.
+
+- `loadstart` - The server fetch has started.
+- `load` - The network request completed successfully.
+- `error` - The network request failed.
+- `loadend` - The network request has completed.
+
+Network events are useful for displaying progress states while the request is in-flight.
+
 ```js
 const check = document.querySelector('auto-check')
-
-check.addEventListener('loadstart', function(event) {
-  console.log('Network request started', event)
-})
-check.addEventListener('loadend', function(event) {
-  console.log('Network request complete', event)
-})
-check.addEventListener('load', function(event) {
-  console.log('Network request succeeded', event)
-})
-check.addEventListener('error', function(event) {
-  console.log('Network request failed', event)
-})
+const container = check.parentElement
+check.addEventListener('loadstart', () => container.classList.add('is-loading'))
+check.addEventListener('loadend', () => container.classList.remove('is-loading'))
+check.addEventListener('load', () => container.classList.add('is-success'))
+check.addEventListener('error', () => container.classList.add('is-error'))
 ```
 
 ### Auto-check events
@@ -92,7 +93,7 @@ input.addEventListener('auto-check-error', async function(event) {
 })
 ```
 
-**`auto-check-complete`** is dispatched after either the success or error events to indicate the end of the auto-check lifecycle. This is a convenient place for cleanup, like hiding progress spinners.
+**`auto-check-complete`** is dispatched after either the success or error events to indicate the end of the auto-check lifecycle.
 
 ```js
 input.addEventListener('auto-check-complete', function(event) {
