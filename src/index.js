@@ -166,13 +166,6 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
   state.previousValue = id
 
-  input.dispatchEvent(
-    new CustomEvent('auto-check-send', {
-      bubbles: true,
-      detail: {body}
-    })
-  )
-
   if (!input.value.trim()) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
@@ -180,6 +173,13 @@ async function check(autoCheckElement: AutoCheckElement) {
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
+
+  input.dispatchEvent(
+    new CustomEvent('auto-check-send', {
+      bubbles: true,
+      detail: {body}
+    })
+  )
 
   if (state.controller) {
     state.controller.abort()
