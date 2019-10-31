@@ -151,7 +151,6 @@ async function check(autoCheckElement: AutoCheckElement) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
 
@@ -160,17 +159,13 @@ async function check(autoCheckElement: AutoCheckElement) {
   body.append('value', input.value)
 
   const id = body.entries ? [...body.entries()].sort().toString() : null
-  if (id && id === state.previousValue) {
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
-    return
-  }
+  if (id && id === state.previousValue) return
   state.previousValue = id
 
   if (!input.value.trim()) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
     return
   }
 
