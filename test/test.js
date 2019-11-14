@@ -232,6 +232,14 @@ describe('auto-check element', function() {
       input.dispatchEvent(new InputEvent('change'))
       input.dispatchEvent(new InputEvent('change'))
     })
+
+    it('do not emit if essential attributes are missing', async function() {
+      const events = []
+      checker.removeAttribute('src')
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerChange(input, 'hub')
+      assert.deepEqual(events, [])
+    })
   })
 })
 
