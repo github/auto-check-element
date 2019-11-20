@@ -99,6 +99,18 @@ function setLoadingState(event: Event) {
   const input = event.currentTarget
   if (!(input instanceof HTMLInputElement)) return
 
+  const autoCheckElement = input.closest('auto-check')
+  if (!(autoCheckElement instanceof AutoCheckElement)) return
+
+  const src = autoCheckElement.src
+  const csrf = autoCheckElement.csrf
+  const state = states.get(autoCheckElement)
+
+  // If some attributes are missing we want to exit early and make sure that the element is valid.
+  if (!src || !csrf || !state) {
+    return
+  }
+
   let message = 'Verifying…'
   const setValidity = text => (message = text)
   input.dispatchEvent(
@@ -108,8 +120,7 @@ function setLoadingState(event: Event) {
     })
   )
 
-  const autoCheckElement = input.closest('auto-check')
-  if (autoCheckElement instanceof AutoCheckElement && autoCheckElement.required) {
+  if (autoCheckElement.required) {
     input.setCustomValidity(message)
   }
 }
