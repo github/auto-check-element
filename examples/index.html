@@ -43,7 +43,7 @@
           focusedInput = formInput
         })
 
-        form.addEventListener('auto-check-send', () => {
+        form.addEventListener('auto-check-start', () => {
           if (form.id === 'custom') {
             const {setValidity} = event.detail
             setValidity('🔍 Checking validity...')
