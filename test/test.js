@@ -44,6 +44,13 @@ describe('auto-check element', function() {
       assert.isFalse(input.checkValidity())
     })
 
+    it('invalidates the input element on keypress', async function() {
+      const inputEvent = once(input, 'change')
+      triggerChange(input, 'hub')
+      await inputEvent
+      assert.isFalse(input.checkValidity())
+    })
+
     it('invalidates input request is in-flight', async function() {
       triggerChange(input, 'hub')
       await once(checker, 'loadstart')
@@ -66,7 +73,7 @@ describe('auto-check element', function() {
     it('customizes the in-flight message', async function() {
       checker.src = '/fail'
       const send = new Promise(resolve => {
-        input.addEventListener('auto-check-send', event => {
+        input.addEventListener('auto-check-start', event => {
           event.detail.setValidity('Checking with server')
           resolve()
         })
@@ -174,6 +181,23 @@ describe('auto-check element', function() {
       triggerChange(input, 'hub')
     })
 
+    it('emits auto-check-start on input', function(done) {
+      input.addEventListener('auto-check-start', () => done())
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('input'))
+    })
+
+    it('emits auto-check-start on change', function(done) {
+      input.addEventListener('auto-check-start', () => done())
+      triggerChange(input, 'hub')
+    })
+
+    it('emits auto-check-send 300 milliseconds after keypress', function(done) {
+      input.addEventListener('auto-check-send', () => done())
+      input.value = 'hub'
+      input.dispatchEvent(new InputEvent('input'))
+    })
+
     it('emits auto-check-success when server responds with 200 OK', async function() {
       triggerChange(input, 'hub')
       const event = await once(input, 'auto-check-success')
@@ -207,6 +231,14 @@ describe('auto-check element', function() {
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('change'))
       input.dispatchEvent(new InputEvent('change'))
+    })
+
+    it('do not emit if essential attributes are missing', async function() {
+      const events = []
+      checker.removeAttribute('src')
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerChange(input, 'hub')
+      assert.deepEqual(events, [])
     })
   })
 })
