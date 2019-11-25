@@ -6,7 +6,6 @@ type Controller = AbortController | {signal: ?AbortSignal, abort: () => void}
 
 type State = {
   check: Event => mixed,
-  previousValue: ?string,
   controller: ?Controller
 }
 
@@ -18,7 +17,7 @@ export default class AutoCheckElement extends HTMLElement {
     if (!input) return
 
     const checker = debounce(check.bind(null, this), 300)
-    const state = {check: checker, controller: null, previousValue: null}
+    const state = {check: checker, controller: null}
     states.set(this, state)
 
     input.addEventListener('change', setLoadingState)
@@ -111,14 +110,6 @@ function setLoadingState(event: Event) {
     return
   }
 
-  const body = new FormData()
-  body.append('authenticity_token', csrf)
-  body.append('value', input.value)
-
-  const id = body.entries ? [...body.entries()].sort().toString() : null
-  if (id && id === state.previousValue) return
-  state.previousValue = id
-
   let message = 'Verifying…'
   const setValidity = text => (message = text)
   input.dispatchEvent(
@@ -173,16 +164,16 @@ async function check(autoCheckElement: AutoCheckElement) {
     return
   }
 
-  const body = new FormData()
-  body.append('authenticity_token', csrf)
-  body.append('value', input.value)
-
   if (!input.value.trim()) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
     return
   }
+
+  const body = new FormData()
+  body.append('authenticity_token', csrf)
+  body.append('value', input.value)
 
   input.dispatchEvent(
     new CustomEvent('auto-check-send', {
