@@ -20,9 +20,7 @@ export default class AutoCheckElement extends HTMLElement {
     const state = {check: checker, controller: null}
     states.set(this, state)
 
-    input.addEventListener('change', setLoadingState)
     input.addEventListener('input', setLoadingState)
-    input.addEventListener('change', checker)
     input.addEventListener('input', checker)
     input.autocomplete = 'off'
     input.spellcheck = false
