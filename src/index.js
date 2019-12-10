@@ -34,9 +34,7 @@ export default class AutoCheckElement extends HTMLElement {
     if (!state) return
     states.delete(this)
 
-    input.removeEventListener('change', setLoadingState)
     input.removeEventListener('input', setLoadingState)
-    input.removeEventListener('change', state.check)
     input.removeEventListener('input', state.check)
     input.setCustomValidity('')
   }
