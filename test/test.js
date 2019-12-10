@@ -45,27 +45,27 @@ describe('auto-check element', function() {
     })
 
     it('invalidates the input element on keypress', async function() {
-      const inputEvent = once(input, 'change')
-      triggerChange(input, 'hub')
+      const inputEvent = once(input, 'input')
+      triggerInput(input, 'hub')
       await inputEvent
       assert.isFalse(input.checkValidity())
     })
 
     it('invalidates input request is in-flight', async function() {
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       await once(checker, 'loadstart')
       assert.isFalse(input.checkValidity())
     })
 
     it('invalidates input with failed server response', async function() {
       checker.src = '/fail'
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       await once(input, 'auto-check-complete')
       assert.isFalse(input.checkValidity())
     })
 
     it('validates input with successful server response', async function() {
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       await once(input, 'auto-check-complete')
       assert.isTrue(input.checkValidity())
     })
@@ -77,7 +77,7 @@ describe('auto-check element', function() {
           event.detail.setValidity('Checking with server')
           resolve()
         })
-        triggerChange(input, 'hub')
+        triggerInput(input, 'hub')
       })
       await send
       assert(!input.validity.valid)
@@ -91,7 +91,7 @@ describe('auto-check element', function() {
           event.detail.setValidity('A custom error')
           resolve()
         })
-        triggerChange(input, 'hub')
+        triggerInput(input, 'hub')
       })
       await error
       assert(!input.validity.valid)
@@ -103,7 +103,7 @@ describe('auto-check element', function() {
       checker.required = false
       input.value = 'hub'
       assert.isTrue(input.checkValidity())
-      input.dispatchEvent(new InputEvent('change'))
+      input.dispatchEvent(new InputEvent('input'))
       await once(input, 'auto-check-complete')
       assert.isTrue(input.checkValidity())
     })
@@ -141,7 +141,7 @@ describe('auto-check element', function() {
       checker.addEventListener('loadend', track)
 
       const completed = Promise.all([once(checker, 'loadstart'), once(checker, 'load'), once(checker, 'loadend')])
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       await completed
 
       assert.deepEqual(['loadstart', 'load', 'loadend'], events)
@@ -178,7 +178,7 @@ describe('auto-check element', function() {
 
     it('emits auto-check-send on change', function(done) {
       input.addEventListener('auto-check-send', () => done())
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
     })
 
     it('emits auto-check-start on input', function(done) {
@@ -189,7 +189,7 @@ describe('auto-check element', function() {
 
     it('emits auto-check-start on change', function(done) {
       input.addEventListener('auto-check-start', () => done())
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
     })
 
     it('emits auto-check-send 300 milliseconds after keypress', function(done) {
@@ -199,7 +199,7 @@ describe('auto-check element', function() {
     })
 
     it('emits auto-check-success when server responds with 200 OK', async function() {
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       const event = await once(input, 'auto-check-success')
       const result = await event.detail.response.text()
       assert.equal('This is a warning', result)
@@ -207,7 +207,7 @@ describe('auto-check element', function() {
 
     it('emits auto-check-error event when server returns an error response', async function() {
       checker.src = '/fail'
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       const event = await once(input, 'auto-check-error')
       const result = await event.detail.response.text()
       assert.equal('This is an error', result)
@@ -215,7 +215,7 @@ describe('auto-check element', function() {
 
     it('emits auto-check-complete event at the end of the lifecycle', function(done) {
       input.addEventListener('auto-check-complete', () => done())
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
     })
 
     it('emits auto-check-send event before checking if there is a duplicate request', function(done) {
@@ -229,15 +229,15 @@ describe('auto-check element', function() {
       })
 
       input.value = 'hub'
-      input.dispatchEvent(new InputEvent('change'))
-      input.dispatchEvent(new InputEvent('change'))
+      input.dispatchEvent(new InputEvent('input'))
+      input.dispatchEvent(new InputEvent('input'))
     })
 
     it('do not emit if essential attributes are missing', async function() {
       const events = []
       checker.removeAttribute('src')
       input.addEventListener('auto-check-start', event => events.push(event.type))
-      triggerChange(input, 'hub')
+      triggerInput(input, 'hub')
       assert.deepEqual(events, [])
     })
   })
@@ -249,7 +249,7 @@ function once(element, eventName) {
   })
 }
 
-function triggerChange(input, value) {
+function triggerInput(input, value) {
   input.value = value
-  return input.dispatchEvent(new InputEvent('change'))
+  return input.dispatchEvent(new InputEvent('input'))
 }
