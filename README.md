@@ -20,6 +20,8 @@ import '@github/auto-check-element'
 </auto-check>
 ```
 
+Note that in the following example the CSRF element is marked with the `data-csrf` attribute rather than `name` so that the value doesn't get posted to the backend when the element is placed in a form.
+
 ```erb
 <auto-check src="/signup-check/username">
   <input>
