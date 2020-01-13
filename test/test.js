@@ -257,6 +257,18 @@ describe('auto-check element', function() {
       const autoCheck = document.querySelector('auto-check')
       assert.equal(autoCheck.csrf, 'foo')
     })
+
+    it('fetches CSRF tokens from child elements', function() {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check src="/success" required>
+          <input>
+          <input type="hidden" data-csrf value="foo">
+        </auto-check>`
+      document.body.append(container)
+      const autoCheck = document.querySelector('auto-check')
+      assert.equal(autoCheck.csrf, 'foo')
+    })
   })
 })
 
