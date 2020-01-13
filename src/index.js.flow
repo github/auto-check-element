@@ -1,4 +1,4 @@
-/* flow strict */
+/* @flow strict */
 
 declare module 'auto-check-element' {
   declare export default class AutoCheckElement extends HTMLElement {
