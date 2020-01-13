@@ -241,6 +241,23 @@ describe('auto-check element', function() {
       assert.deepEqual(events, [])
     })
   })
+
+  describe('csrf support', function() {
+    afterEach(function() {
+      document.body.innerHTML = ''
+    })
+
+    it('fetches CSRF tokens from attributes', function() {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check csrf="foo" src="/success" required>
+          <input>
+        </auto-check>`
+      document.body.append(container)
+      const autoCheck = document.querySelector('auto-check')
+      assert.equal(autoCheck.csrf, 'foo')
+    })
+  })
 })
 
 function once(element, eventName) {
