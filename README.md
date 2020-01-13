@@ -20,10 +20,20 @@ import '@github/auto-check-element'
 </auto-check>
 ```
 
+Note that in the following example the CSRF element is marked with the `data-csrf` attribute rather than `name` so that the value doesn't get posted to the backend when the element is placed in a form.
+
+```erb
+<auto-check src="/signup-check/username">
+  <input>
+  <input hidden data-csrf value="<%= authenticity_token_for("/signup-check/username") %>">
+</auto-check>
+```
+
 ## Attributes
 
 - `src` is the server endpoint that will receive POST requests. The posted form contains a `value` parameter containing the text input to validate. Responding with a 200 OK status indicates the provided value is valid. Any other error status response indicates the provided value is invalid.
 - `csrf` is the [CSRF][] token for the posted form. It's available in the request body as a `authenticity_token` form parameter.
+  - You can also supply the CSRF token via a child element. See [usage](#Usage) example.
 - `required` is a boolean attribute that requires the validation to succeed before the surrounding form may be submitted.
 
 ## Events

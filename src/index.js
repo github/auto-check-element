@@ -70,7 +70,8 @@ export default class AutoCheckElement extends HTMLElement {
   }
 
   get csrf(): string {
-    return this.getAttribute('csrf') || ''
+    const csrfElement = this.querySelector('[data-csrf]')
+    return this.getAttribute('csrf') || (csrfElement instanceof HTMLInputElement && csrfElement.value) || ''
   }
 
   set csrf(value: string) {
