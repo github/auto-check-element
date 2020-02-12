@@ -194,12 +194,12 @@ async function check(autoCheckElement: AutoCheckElement) {
       method: 'POST',
       body
     })
+    state.controller = null
     if (response.status === 200) {
       processSuccess(response, input, autoCheckElement.required)
     } else {
       processFailure(response, input, autoCheckElement.required)
     }
-    state.controller = null
     input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
   } catch (error) {
     if (error.name !== 'AbortError') {
