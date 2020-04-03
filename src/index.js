@@ -194,7 +194,7 @@ async function check(autoCheckElement: AutoCheckElement) {
       method: 'POST',
       body
     })
-    if (response.status === 200) {
+    if (response.ok) {
       processSuccess(response, input, autoCheckElement.required)
     } else {
       processFailure(response, input, autoCheckElement.required)
