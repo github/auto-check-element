@@ -4,19 +4,19 @@
   "description": "An input element that validates its value with a server endpoint.",
   "repository": "github/auto-check-element",
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
-  "main": "dist/index.umd.js",
-  "module": "dist/index.esm.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rm -rf dist/",
     "lint": "github-lint",
-    "prebuild": "npm run clean && npm run lint",
-    "build": "rollup -c && cp src/index.js.flow dist/index.esm.js.flow && cp src/index.js.flow dist/index.umd.js.flow",
+    "prebuild": "npm run clean && npm run lint && tsc",
+    "build": "rollup -c",
     "pretest": "npm run build",
-    "test": "karma start test/karma.config.js",
+    "test": "karma start test/karma.config.cjs",
     "prepublishOnly": "npm run build",
     "postpublish": "npm publish --ignore-scripts --@github:registry='https://npm.pkg.github.com'"
   },
@@ -27,24 +27,23 @@
     "input"
   ],
   "license": "MIT",
+  "prettier": "@github/prettier-config",
   "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "babel-preset-github": "^3.2.0",
+    "@github/prettier-config": "0.0.4",
     "chai": "^4.2.0",
-    "eslint": "^6.1.0",
-    "eslint-plugin-github": "^3.0.1",
-    "flow-bin": "^0.103.0",
-    "karma": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-github": "^3.4.1",
+    "karma": "^5.0.9",
     "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.0.0",
-    "karma-mocha": "^1.3.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
-    "mocha": "^6.2.0",
-    "rollup": "^1.17.0",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-node-resolve": "^5.2.0"
+    "mocha": "^6.2.3",
+    "rollup": "^1.32.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "typescript": "^3.9.3"
   },
   "dependencies": {
-    "@github/mini-throttle": "^1.0.5"
+    "@github/mini-throttle": "^1.0.7"
   }
 }
