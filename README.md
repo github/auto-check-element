@@ -10,9 +10,21 @@ $ npm install --save @github/auto-check-element
 
 ## Usage
 
+### Script
+
+Import as ES modules:
+
 ```js
 import '@github/auto-check-element'
 ```
+
+With a script tag:
+
+```html
+<script type="module" src="./node_modules/@github/auto-check-element/dist/index.js">
+```
+
+### Markup
 
 ```erb
 <auto-check src="/signup-check/username" csrf="<%= authenticity_token_for("/signup-check/username") %>">
