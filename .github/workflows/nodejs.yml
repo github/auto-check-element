@@ -1,24 +1,23 @@
-name: Node.js CI
+name: Node CI
 
-on: [push]
-
+on: push
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        node-version: ['*']
-
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
+    - uses: actions/checkout@v1
+    - name: Use Node.js 12.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run build --if-present
-    - run: npm test
+        node-version: 12.x
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm test
       env:
         CI: true
