@@ -247,6 +247,9 @@ declare global {
   interface Window {
     AutoCheckElement: typeof AutoCheckElement
   }
+  interface HTMLElementTagNameMap {
+    'auto-check': AutoCheckElement
+  }
 }
 
 if (!window.customElements.get('auto-check')) {
