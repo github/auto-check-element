@@ -1,13 +1,8 @@
 {
   "extends": [
-    "plugin:github/es6",
     "plugin:github/browser",
     "plugin:github/typescript"
   ],
-  "rules": {
-    "github/no-then": "off",
-    "no-invalid-this": "off"
-  },
   "overrides": [{
     "files": "*.js",
     "parser": "espree",

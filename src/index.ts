@@ -57,7 +57,7 @@ export default class AutoCheckElement extends HTMLElement {
     const src = this.getAttribute('src')
     if (!src) return ''
 
-    const link = this.ownerDocument!.createElement('a')
+    const link = this.ownerDocument.createElement('a')
     link.href = src
     return link.href
   }
