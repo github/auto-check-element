@@ -125,7 +125,7 @@ function makeAbortController() {
   return {
     signal: null,
     abort() {
-      /* */
+      // Do nothing
     }
   }
 }
