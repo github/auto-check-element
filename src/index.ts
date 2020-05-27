@@ -1,12 +1,10 @@
-/* @flow strict */
-
 import {debounce} from '@github/mini-throttle'
 
-type Controller = AbortController | {signal: ?AbortSignal, abort: () => void}
+type Controller = AbortController | {signal: AbortSignal | null; abort: () => void}
 
 type State = {
-  check: Event => mixed,
-  controller: ?Controller
+  check: (event: Event) => unknown
+  controller: Controller | null
 }
 
 const states = new WeakMap<AutoCheckElement, State>()
@@ -47,20 +45,19 @@ export default class AutoCheckElement extends HTMLElement {
     }
   }
 
-  static get observedAttributes(): Array<string> {
+  static get observedAttributes(): string[] {
     return ['required']
   }
 
-  get input(): ?HTMLInputElement {
-    const input = this.querySelector('input')
-    return input instanceof HTMLInputElement ? input : null
+  get input(): HTMLInputElement | null {
+    return this.querySelector('input')
   }
 
   get src(): string {
     const src = this.getAttribute('src')
     if (!src) return ''
 
-    const link = this.ownerDocument.createElement('a')
+    const link = this.ownerDocument!.createElement('a')
     link.href = src
     return link.href
   }
@@ -108,7 +105,7 @@ function setLoadingState(event: Event) {
   }
 
   let message = 'Verifying…'
-  const setValidity = text => (message = text)
+  const setValidity = (text: string) => (message = text)
   input.dispatchEvent(
     new CustomEvent('auto-check-start', {
       bubbles: true,
@@ -125,10 +122,15 @@ function makeAbortController() {
   if ('AbortController' in window) {
     return new AbortController()
   }
-  return {signal: null, abort() {}}
+  return {
+    signal: null,
+    abort() {
+      // Do nothing
+    }
+  }
 }
 
-async function fetchWithNetworkEvents(el: Element, url: string, options: RequestOptions): Promise<Response> {
+async function fetchWithNetworkEvents(el: Element, url: string, options: RequestInit): Promise<Response> {
   try {
     const response = await fetch(url, options)
     el.dispatchEvent(new CustomEvent('load'))
@@ -225,7 +227,7 @@ function processSuccess(response: Response, input: HTMLInputElement, required: b
 
 function processFailure(response: Response, input: HTMLInputElement, required: boolean) {
   let message = 'Validation failed'
-  const setValidity = text => (message = text)
+  const setValidity = (text: string) => (message = text)
   input.dispatchEvent(
     new CustomEvent('auto-check-error', {
       bubbles: true,
@@ -238,6 +240,15 @@ function processFailure(response: Response, input: HTMLInputElement, required: b
 
   if (required) {
     input.setCustomValidity(message)
+  }
+}
+
+declare global {
+  interface Window {
+    AutoCheckElement: typeof AutoCheckElement
+  }
+  interface HTMLElementTagNameMap {
+    'auto-check': AutoCheckElement
   }
 }
 
