@@ -10,7 +10,7 @@ type State = {
 const states = new WeakMap<AutoCheckElement, State>()
 
 export default class AutoCheckElement extends HTMLElement {
-  connectedCallback() {
+  connectedCallback(): void {
     const input = this.input
     if (!input) return
 
@@ -24,7 +24,7 @@ export default class AutoCheckElement extends HTMLElement {
     input.spellcheck = false
   }
 
-  disconnectedCallback() {
+  disconnectedCallback(): void {
     const input = this.input
     if (!input) return
 
@@ -37,7 +37,7 @@ export default class AutoCheckElement extends HTMLElement {
     input.setCustomValidity('')
   }
 
-  attributeChangedCallback(name: string) {
+  attributeChangedCallback(name: string): void {
     if (name === 'required') {
       const input = this.input
       if (!input) return
