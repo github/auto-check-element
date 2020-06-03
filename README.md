@@ -12,7 +12,7 @@ $ npm install --save @github/auto-check-element
 
 ### Script
 
-Import as ES modules:
+Import as a modules:
 
 ```js
 import '@github/auto-check-element'
