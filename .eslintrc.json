@@ -1,13 +1,21 @@
 {
   "root": true,
+  "plugins": ["custom-elements"],
   "extends": [
     "plugin:github/recommended",
     "plugin:github/browser",
-    "plugin:github/typescript"
+    "plugin:github/typescript",
+    "plugin:custom-elements/recommended"
   ],
-  "overrides": [{
-    "files": "*.js",
-    "parser": "espree",
-    "parserOptions": {"ecmaVersion": 8}
-  }]
+  "rules": {
+    "custom-elements/tag-name-matches-class": ["error", {"suffix": "Element"}],
+    "custom-elements/file-name-matches-element": "off"
+  },
+  "overrides": [
+    {
+      "files": "*.js",
+      "parser": "espree",
+      "parserOptions": {"ecmaVersion": 8}
+    }
+  ]
 }
