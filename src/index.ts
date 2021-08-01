@@ -62,7 +62,7 @@ export default class AutoCheckElement extends HTMLElement {
     return link.href
   }
 
-  get csrfFieldName(): string {
+  get csrfField(): string {
     return this.getAttribute('csrf-field') || 'authenticity_token'
   }
 
@@ -155,7 +155,7 @@ async function check(autoCheckElement: AutoCheckElement) {
     return
   }
 
-  const csrfFieldName = autoCheckElement.csrfFieldName
+  const csrfField = autoCheckElement.csrfField
   const src = autoCheckElement.src
   const csrf = autoCheckElement.csrf
   const state = states.get(autoCheckElement)
@@ -176,7 +176,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
-  body.append(csrfFieldName, csrf)
+  body.append(csrfField, csrf)
   body.append('value', input.value)
 
   input.dispatchEvent(
