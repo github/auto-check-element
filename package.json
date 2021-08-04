@@ -1,6 +1,6 @@
 {
   "name": "@github/auto-check-element",
-  "version": "5.1.3",
+  "version": "5.2.0",
   "description": "An input element that validates its value with a server endpoint.",
   "repository": "github/auto-check-element",
   "files": [
