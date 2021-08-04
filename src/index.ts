@@ -62,10 +62,6 @@ export default class AutoCheckElement extends HTMLElement {
     return link.href
   }
 
-  get csrfField(): string {
-    return this.getAttribute('csrf-field') || 'authenticity_token'
-  }
-
   set src(value: string) {
     this.setAttribute('src', value)
   }
@@ -89,6 +85,14 @@ export default class AutoCheckElement extends HTMLElement {
     } else {
       this.removeAttribute('required')
     }
+  }
+
+  get csrfField(): string {
+    return this.getAttribute('csrf-field') || 'authenticity_token'
+  }
+
+  set csrfField(value: string) {
+    this.setAttribute('csrf-field', value);
   }
 }
 
