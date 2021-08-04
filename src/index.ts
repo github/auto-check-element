@@ -92,7 +92,7 @@ export default class AutoCheckElement extends HTMLElement {
   }
 
   set csrfField(value: string) {
-    this.setAttribute('csrf-field', value);
+    this.setAttribute('csrf-field', value)
   }
 }
 
