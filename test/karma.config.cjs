@@ -1,3 +1,5 @@
+process.env.CHROME_BIN = require('chromium').path
+
 function checker(request, response, next) {
   if (request.method === 'POST' && request.url.startsWith('/fail')) {
     response.writeHead(422)
