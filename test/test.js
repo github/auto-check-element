@@ -1,3 +1,6 @@
+import {assert} from '@esm-bundle/chai'
+import '../src/index.ts'
+
 describe('auto-check element', function () {
   describe('element creation', function () {
     it('creates from document.createElement', function () {
