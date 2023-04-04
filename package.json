@@ -46,6 +46,6 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@github/mini-throttle": "^1.0.7"
+    "@github/mini-throttle": "^2.1.0"
   }
 }
