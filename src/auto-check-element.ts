@@ -14,9 +14,60 @@ type State = {
 
 const states = new WeakMap<AutoCheckElement, State>()
 
-export class AutoCheckCompleteEvent extends Event {
+class AutoCheckEvent extends Event {
+  constructor(public readonly phase: string) {
+    super(`auto-check-${phase}`, {bubbles: true})
+  }
+
+  // Backwards compatibiltiy with `CustomEvent`
+  get detail() {
+    return this
+  }
+}
+
+class AutoCheckValidationEvent extends AutoCheckEvent {
+  constructor(public readonly phase: string, public message = '') {
+    super(phase)
+  }
+
+  setValidity(message: string) {
+    this.message = message
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckCompleteEvent extends AutoCheckEvent {
   constructor() {
-    super('auto-check-complete', {bubbles: true})
+    super('complete')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckSuccessEvent extends AutoCheckEvent {
+  constructor(public readonly response: Response) {
+    super('success')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckStartEvent extends AutoCheckValidationEvent {
+  constructor() {
+    super('start', 'Verifying…')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckErrorEvent extends AutoCheckValidationEvent {
+  constructor(public readonly response: Response) {
+    // eslint-disable-next-line i18n-text/no-en
+    super('error', 'Validation failed')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckSendEvent extends AutoCheckEvent {
+  constructor(public readonly body: FormData) {
+    super('send')
   }
 }
 
@@ -128,17 +179,10 @@ function setLoadingState(event: Event) {
     return
   }
 
-  let message = 'Verifying…'
-  const setValidity = (text: string) => (message = text)
-  input.dispatchEvent(
-    new CustomEvent('auto-check-start', {
-      bubbles: true,
-      detail: {setValidity},
-    }),
-  )
-
+  const startEvent = new AutoCheckStartEvent()
+  input.dispatchEvent(startEvent)
   if (autoCheckElement.required) {
-    input.setCustomValidity(message)
+    input.setCustomValidity(startEvent.message)
   }
 }
 
@@ -199,12 +243,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   body.append(csrfField, csrf)
   body.append('value', input.value)
 
-  input.dispatchEvent(
-    new CustomEvent('auto-check-send', {
-      bubbles: true,
-      detail: {body},
-    }),
-  )
+  input.dispatchEvent(new AutoCheckSendEvent(body))
 
   if (state.controller) {
     state.controller.abort()
@@ -222,9 +261,16 @@ async function check(autoCheckElement: AutoCheckElement) {
       body,
     })
     if (response.ok) {
-      processSuccess(response, input, autoCheckElement.required)
+      if (autoCheckElement.required) {
+        input.setCustomValidity('')
+      }
+      input.dispatchEvent(new AutoCheckSuccessEvent(response.clone()))
     } else {
-      processFailure(response, input, autoCheckElement.required)
+      const event = new AutoCheckErrorEvent(response.clone())
+      input.dispatchEvent(event)
+      if (autoCheckElement.required) {
+        input.setCustomValidity(event.message)
+      }
     }
     state.controller = null
     input.dispatchEvent(new AutoCheckCompleteEvent())
@@ -233,39 +279,6 @@ async function check(autoCheckElement: AutoCheckElement) {
       state.controller = null
       input.dispatchEvent(new AutoCheckCompleteEvent())
     }
-  }
-}
-
-function processSuccess(response: Response, input: HTMLInputElement, required: boolean) {
-  if (required) {
-    input.setCustomValidity('')
-  }
-  input.dispatchEvent(
-    new CustomEvent('auto-check-success', {
-      bubbles: true,
-      detail: {
-        response: response.clone(),
-      },
-    }),
-  )
-}
-
-function processFailure(response: Response, input: HTMLInputElement, required: boolean) {
-  // eslint-disable-next-line i18n-text/no-en
-  let message = 'Validation failed'
-  const setValidity = (text: string) => (message = text)
-  input.dispatchEvent(
-    new CustomEvent('auto-check-error', {
-      bubbles: true,
-      detail: {
-        response: response.clone(),
-        setValidity,
-      },
-    }),
-  )
-
-  if (required) {
-    input.setCustomValidity(message)
   }
 }
 
