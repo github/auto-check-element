@@ -77,6 +77,21 @@ export class AutoCheckElement extends HTMLElement {
     return this
   }
 
+  #onloadend: ((event: Event) => void) | null = null
+  get onloadend() {
+    return this.#onloadend
+  }
+
+  set onloadend(listener: ((event: Event) => void) | null) {
+    if (this.#onloadend) {
+      this.removeEventListener('loadend', this.#onloadend as unknown as EventListenerOrEventListenerObject)
+    }
+    this.#onloadend = typeof listener === 'object' || typeof listener === 'function' ? listener : null
+    if (typeof listener === 'function') {
+      this.addEventListener('loadend', listener as unknown as EventListenerOrEventListenerObject)
+    }
+  }
+
   connectedCallback(): void {
     const input = this.input
     if (!input) return

@@ -151,6 +151,22 @@ describe('auto-check element', function () {
 
       assert.deepEqual(['loadstart', 'load', 'loadend'], events)
     })
+
+    it('can use setters', async function () {
+      const events = []
+      const track = event => events.push(event.type)
+
+      checker.onloadstart = track
+      checker.onload = track
+      checker.onerror = track
+      checker.onloadend = track
+
+      const completed = Promise.all([once(checker, 'loadstart'), once(checker, 'load'), once(checker, 'loadend')])
+      triggerInput(input, 'hub')
+      await completed
+
+      assert.deepEqual(['loadstart', 'load', 'loadend'], events)
+    })
   })
 
   describe('auto-check lifecycle events', function () {
@@ -234,7 +250,6 @@ describe('auto-check element', function () {
       })
 
       input.value = 'hub'
-      input.dispatchEvent(new InputEvent('input'))
       input.dispatchEvent(new InputEvent('input'))
     })
 

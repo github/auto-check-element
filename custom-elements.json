@@ -160,6 +160,19 @@
             },
             {
               "kind": "field",
+              "name": "#onloadend",
+              "privacy": "private",
+              "type": {
+                "text": "((event: Event) => void) | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "onloadend"
+            },
+            {
+              "kind": "field",
               "name": "input",
               "type": {
                 "text": "HTMLInputElement | null"
