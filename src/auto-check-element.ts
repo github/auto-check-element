@@ -19,7 +19,7 @@ class AutoCheckEvent extends Event {
     super(`auto-check-${phase}`, {bubbles: true})
   }
 
-  // Backwards compatibiltiy with `CustomEvent`
+  // Backwards compatibility with `CustomEvent`
   get detail() {
     return this
   }
