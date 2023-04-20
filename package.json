@@ -1,51 +1,60 @@
 {
-  "name": "@github/auto-check-element",
-  "version": "5.2.0",
-  "description": "An input element that validates its value with a server endpoint.",
-  "repository": "github/auto-check-element",
-  "files": [
-    "dist"
-  ],
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "type": "module",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "clean": "rm -rf dist/",
-    "lint": "eslint . --ext .js,.ts && tsc --noEmit",
-    "prebuild": "npm run clean && npm run lint",
-    "build": "tsc && rollup -c",
-    "pretest": "npm run build",
-    "test": "karma start test/karma.config.cjs",
-    "prepublishOnly": "npm run build",
-    "postpublish": "npm publish --ignore-scripts --@github:registry='https://npm.pkg.github.com'"
-  },
-  "keywords": [
-    "custom element",
-    "web component",
-    "auto-check",
-    "input"
-  ],
-  "license": "MIT",
-  "prettier": "@github/prettier-config",
-  "devDependencies": {
-    "@github/prettier-config": "0.0.4",
-    "chai": "^4.3.4",
-    "chromium": "^3.0.3",
-    "eslint": "^7.25.0",
-    "eslint-plugin-custom-elements": "^0.0.2",
-    "eslint-plugin-github": "^4.1.3",
-    "karma": "^6.3.2",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-mocha": "^2.0.1",
-    "karma-mocha-reporter": "^2.2.5",
-    "mocha": "^8.3.2",
-    "rollup": "^2.45.2",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "typescript": "^4.2.4"
-  },
-  "dependencies": {
-    "@github/mini-throttle": "^2.1.0"
-  }
+    "name": "@github/auto-check-element",
+    "version": "5.2.0",
+    "description": "An input element that validates its value with a server endpoint.",
+    "repository": "github/auto-check-element",
+    "files": [
+        "dist"
+    ],
+    "main": "dist/bundle.js",
+    "module": "dist/index.js",
+    "type": "module",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js",
+        "./define": "./dist/index.js",
+        "./auto-check": "./dist/auto-check-element.js",
+        "./auto-check/define": "./dist/auto-check-element-define.js"
+    },
+    "scripts": {
+        "clean": "rm -rf dist/",
+        "lint": "eslint . --ext .js,.ts && tsc --noEmit",
+        "lint:fix": "npm run lint -- --fix",
+        "prebuild": "npm run clean && npm run lint && mkdir dist",
+        "bundle": "esbuild --bundle dist/index.js --keep-names --outfile=dist/bundle.js --format=esm",
+        "build": "tsc && npm run bundle && npm run manifest",
+        "prepublishOnly": "npm run build",
+        "pretest": "npm run build",
+        "test": "web-test-runner",
+        "postpublish": "npm publish --ignore-scripts --@github:registry='https://npm.pkg.github.com'",
+        "manifest": "custom-elements-manifest analyze"
+    },
+    "keywords": [
+        "custom element",
+        "web component",
+        "auto-check",
+        "input"
+    ],
+    "license": "MIT",
+    "prettier": "@github/prettier-config",
+    "devDependencies": {
+        "@custom-elements-manifest/analyzer": "^0.8.0",
+        "@github/prettier-config": "^0.0.6",
+        "@open-wc/testing": "^3.1.8",
+        "@web/dev-server-esbuild": "^0.3.6",
+        "@web/test-runner": "^0.15.3",
+        "@web/test-runner-playwright": "^0.9.0",
+        "esbuild": "^0.17.17",
+        "eslint": "^8.38.0",
+        "eslint-plugin-custom-elements": "^0.0.8",
+        "eslint-plugin-github": "^4.7.0",
+        "typescript": "^5.0.4"
+    },
+    "eslintIgnore": [
+        "dist/"
+    ],
+    "dependencies": {
+        "@github/mini-throttle": "^2.1.0"
+    },
+    "customElements": "custom-elements.json"
 }
