@@ -1,13 +1,18 @@
+import {assert} from '@open-wc/testing'
+import {AutoCheckElement} from '../src/index.ts'
+
 describe('auto-check element', function () {
   describe('element creation', function () {
     it('creates from document.createElement', function () {
       const el = document.createElement('auto-check')
       assert.equal('AUTO-CHECK', el.nodeName)
+      assert.ok(el instanceof AutoCheckElement)
     })
 
     it('creates from constructor', function () {
       const el = new window.AutoCheckElement()
       assert.equal('AUTO-CHECK', el.nodeName)
+      assert.ok(el instanceof AutoCheckElement)
     })
 
     it('has the correct attributes', function () {
