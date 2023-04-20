@@ -151,13 +151,13 @@ function makeAbortController() {
 async function fetchWithNetworkEvents(el: Element, url: string, options: RequestInit): Promise<Response> {
   try {
     const response = await fetch(url, options)
-    el.dispatchEvent(new CustomEvent('load'))
-    el.dispatchEvent(new CustomEvent('loadend'))
+    el.dispatchEvent(new Event('load'))
+    el.dispatchEvent(new Event('loadend'))
     return response
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
-      el.dispatchEvent(new CustomEvent('error'))
-      el.dispatchEvent(new CustomEvent('loadend'))
+      el.dispatchEvent(new Event('error'))
+      el.dispatchEvent(new Event('loadend'))
     }
     throw error
   }
@@ -203,7 +203,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   if (state.controller) {
     state.controller.abort()
   } else {
-    autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
+    autoCheckElement.dispatchEvent(new Event('loadstart'))
   }
 
   state.controller = makeAbortController()
