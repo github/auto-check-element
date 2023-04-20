@@ -14,6 +14,12 @@ type State = {
 
 const states = new WeakMap<AutoCheckElement, State>()
 
+export class AutoCheckCompleteEvent extends Event {
+  constructor() {
+    super('auto-check-complete', {bubbles: true})
+  }
+}
+
 export class AutoCheckElement extends HTMLElement {
   static define(tag = 'auto-check', registry = customElements) {
     registry.define(tag, this)
@@ -221,11 +227,11 @@ async function check(autoCheckElement: AutoCheckElement) {
       processFailure(response, input, autoCheckElement.required)
     }
     state.controller = null
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+    input.dispatchEvent(new AutoCheckCompleteEvent())
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
       state.controller = null
-      input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+      input.dispatchEvent(new AutoCheckCompleteEvent())
     }
   }
 }
