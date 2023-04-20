@@ -14,10 +14,82 @@ type State = {
 
 const states = new WeakMap<AutoCheckElement, State>()
 
+class AutoCheckEvent extends Event {
+  constructor(public readonly phase: string) {
+    super(`auto-check-${phase}`, {bubbles: true})
+  }
+
+  // Backwards compatibility with `CustomEvent`
+  get detail() {
+    return this
+  }
+}
+
+class AutoCheckValidationEvent extends AutoCheckEvent {
+  constructor(public readonly phase: string, public message = '') {
+    super(phase)
+  }
+
+  setValidity(message: string) {
+    this.message = message
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckCompleteEvent extends AutoCheckEvent {
+  constructor() {
+    super('complete')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckSuccessEvent extends AutoCheckEvent {
+  constructor(public readonly response: Response) {
+    super('success')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckStartEvent extends AutoCheckValidationEvent {
+  constructor() {
+    super('start', 'Verifying…')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckErrorEvent extends AutoCheckValidationEvent {
+  constructor(public readonly response: Response) {
+    // eslint-disable-next-line i18n-text/no-en
+    super('error', 'Validation failed')
+  }
+}
+
+// eslint-disable-next-line custom-elements/no-exports-with-element
+export class AutoCheckSendEvent extends AutoCheckEvent {
+  constructor(public readonly body: FormData) {
+    super('send')
+  }
+}
+
 export class AutoCheckElement extends HTMLElement {
   static define(tag = 'auto-check', registry = customElements) {
     registry.define(tag, this)
     return this
+  }
+
+  #onloadend: ((event: Event) => void) | null = null
+  get onloadend() {
+    return this.#onloadend
+  }
+
+  set onloadend(listener: ((event: Event) => void) | null) {
+    if (this.#onloadend) {
+      this.removeEventListener('loadend', this.#onloadend as unknown as EventListenerOrEventListenerObject)
+    }
+    this.#onloadend = typeof listener === 'object' || typeof listener === 'function' ? listener : null
+    if (typeof listener === 'function') {
+      this.addEventListener('loadend', listener as unknown as EventListenerOrEventListenerObject)
+    }
   }
 
   connectedCallback(): void {
@@ -122,17 +194,10 @@ function setLoadingState(event: Event) {
     return
   }
 
-  let message = 'Verifying…'
-  const setValidity = (text: string) => (message = text)
-  input.dispatchEvent(
-    new CustomEvent('auto-check-start', {
-      bubbles: true,
-      detail: {setValidity},
-    }),
-  )
-
+  const startEvent = new AutoCheckStartEvent()
+  input.dispatchEvent(startEvent)
   if (autoCheckElement.required) {
-    input.setCustomValidity(message)
+    input.setCustomValidity(startEvent.message)
   }
 }
 
@@ -151,13 +216,13 @@ function makeAbortController() {
 async function fetchWithNetworkEvents(el: Element, url: string, options: RequestInit): Promise<Response> {
   try {
     const response = await fetch(url, options)
-    el.dispatchEvent(new CustomEvent('load'))
-    el.dispatchEvent(new CustomEvent('loadend'))
+    el.dispatchEvent(new Event('load'))
+    el.dispatchEvent(new Event('loadend'))
     return response
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
-      el.dispatchEvent(new CustomEvent('error'))
-      el.dispatchEvent(new CustomEvent('loadend'))
+      el.dispatchEvent(new Event('error'))
+      el.dispatchEvent(new Event('loadend'))
     }
     throw error
   }
@@ -193,17 +258,12 @@ async function check(autoCheckElement: AutoCheckElement) {
   body.append(csrfField, csrf)
   body.append('value', input.value)
 
-  input.dispatchEvent(
-    new CustomEvent('auto-check-send', {
-      bubbles: true,
-      detail: {body},
-    }),
-  )
+  input.dispatchEvent(new AutoCheckSendEvent(body))
 
   if (state.controller) {
     state.controller.abort()
   } else {
-    autoCheckElement.dispatchEvent(new CustomEvent('loadstart'))
+    autoCheckElement.dispatchEvent(new Event('loadstart'))
   }
 
   state.controller = makeAbortController()
@@ -216,50 +276,24 @@ async function check(autoCheckElement: AutoCheckElement) {
       body,
     })
     if (response.ok) {
-      processSuccess(response, input, autoCheckElement.required)
+      if (autoCheckElement.required) {
+        input.setCustomValidity('')
+      }
+      input.dispatchEvent(new AutoCheckSuccessEvent(response.clone()))
     } else {
-      processFailure(response, input, autoCheckElement.required)
+      const event = new AutoCheckErrorEvent(response.clone())
+      input.dispatchEvent(event)
+      if (autoCheckElement.required) {
+        input.setCustomValidity(event.message)
+      }
     }
     state.controller = null
-    input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+    input.dispatchEvent(new AutoCheckCompleteEvent())
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
       state.controller = null
-      input.dispatchEvent(new CustomEvent('auto-check-complete', {bubbles: true}))
+      input.dispatchEvent(new AutoCheckCompleteEvent())
     }
-  }
-}
-
-function processSuccess(response: Response, input: HTMLInputElement, required: boolean) {
-  if (required) {
-    input.setCustomValidity('')
-  }
-  input.dispatchEvent(
-    new CustomEvent('auto-check-success', {
-      bubbles: true,
-      detail: {
-        response: response.clone(),
-      },
-    }),
-  )
-}
-
-function processFailure(response: Response, input: HTMLInputElement, required: boolean) {
-  // eslint-disable-next-line i18n-text/no-en
-  let message = 'Validation failed'
-  const setValidity = (text: string) => (message = text)
-  input.dispatchEvent(
-    new CustomEvent('auto-check-error', {
-      bubbles: true,
-      detail: {
-        response: response.clone(),
-        setValidity,
-      },
-    }),
-  )
-
-  if (required) {
-    input.setCustomValidity(message)
   }
 }
 

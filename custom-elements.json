@@ -9,6 +9,138 @@
         {
           "kind": "class",
           "description": "",
+          "name": "AutoCheckCompleteEvent",
+          "superclass": {
+            "name": "AutoCheckEvent",
+            "module": "src/auto-check-element.ts"
+          },
+          "members": [
+            {
+              "kind": "field",
+              "name": "detail",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "AutoCheckEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "AutoCheckSuccessEvent",
+          "superclass": {
+            "name": "AutoCheckEvent",
+            "module": "src/auto-check-element.ts"
+          },
+          "members": [
+            {
+              "kind": "field",
+              "name": "detail",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "AutoCheckEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "AutoCheckStartEvent",
+          "superclass": {
+            "name": "AutoCheckValidationEvent",
+            "module": "src/auto-check-element.ts"
+          },
+          "members": [
+            {
+              "kind": "method",
+              "name": "setValidity",
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "AutoCheckValidationEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "detail",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "AutoCheckEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "AutoCheckErrorEvent",
+          "superclass": {
+            "name": "AutoCheckValidationEvent",
+            "module": "src/auto-check-element.ts"
+          },
+          "members": [
+            {
+              "kind": "method",
+              "name": "setValidity",
+              "parameters": [
+                {
+                  "name": "message",
+                  "type": {
+                    "text": "string"
+                  }
+                }
+              ],
+              "inheritedFrom": {
+                "name": "AutoCheckValidationEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "detail",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "AutoCheckEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "",
+          "name": "AutoCheckSendEvent",
+          "superclass": {
+            "name": "AutoCheckEvent",
+            "module": "src/auto-check-element.ts"
+          },
+          "members": [
+            {
+              "kind": "field",
+              "name": "detail",
+              "readonly": true,
+              "inheritedFrom": {
+                "name": "AutoCheckEvent",
+                "module": "src/auto-check-element.ts"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "description": "",
           "name": "AutoCheckElement",
           "members": [
             {
@@ -25,6 +157,19 @@
                   "default": "customElements"
                 }
               ]
+            },
+            {
+              "kind": "field",
+              "name": "#onloadend",
+              "privacy": "private",
+              "type": {
+                "text": "((event: Event) => void) | null"
+              },
+              "default": "null"
+            },
+            {
+              "kind": "field",
+              "name": "onloadend"
             },
             {
               "kind": "field",
@@ -75,6 +220,46 @@
         }
       ],
       "exports": [
+        {
+          "kind": "js",
+          "name": "AutoCheckCompleteEvent",
+          "declaration": {
+            "name": "AutoCheckCompleteEvent",
+            "module": "src/auto-check-element.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AutoCheckSuccessEvent",
+          "declaration": {
+            "name": "AutoCheckSuccessEvent",
+            "module": "src/auto-check-element.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AutoCheckStartEvent",
+          "declaration": {
+            "name": "AutoCheckStartEvent",
+            "module": "src/auto-check-element.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AutoCheckErrorEvent",
+          "declaration": {
+            "name": "AutoCheckErrorEvent",
+            "module": "src/auto-check-element.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "AutoCheckSendEvent",
+          "declaration": {
+            "name": "AutoCheckSendEvent",
+            "module": "src/auto-check-element.ts"
+          }
+        },
         {
           "kind": "js",
           "name": "AutoCheckElement",
