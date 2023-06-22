@@ -9,27 +9,29 @@
     </style>
   </head>
   <body>
-    <h1>Simple form</h1>
-    <p>Input 422 for an error response.</p>
-    <form>
-      <label for="simple-field">Input</label>
-      <auto-check csrf="foo" src="/demo" required>
-        <input id="simple-field" autofocus name="foo" required />
-        <code class="state"></code>
-      </auto-check>
-      <button>submit</button>
-    </form>
+    <main>
+      <h1>Simple form</h1>
+      <p>Input 422 for an error response.</p>
+      <form>
+        <label for="simple-field">Input</label>
+        <auto-check csrf="foo" src="/demo" required>
+          <input id="simple-field" autofocus name="foo" required />
+          <code class="state"></code>
+        </auto-check>
+        <button>submit</button>
+      </form>
 
-    <h1>Form that has custom validity messages</h1>
-    <p>Input 422 for an error response.</p>
-    <form id="custom">
-      <label for="custom-field">Input</label>
-      <auto-check csrf="foo" src="/demo" required>
-        <input id="custom-field" autofocus class="json" name="foo" required />
-        <code class="state"></code>
-      </auto-check>
-      <button>submit</button>
-    </form>
+      <h1>Form that has custom validity messages</h1>
+      <p>Input 422 for an error response.</p>
+      <form id="custom">
+        <label for="custom-field">Input</label>
+        <auto-check csrf="foo" src="/demo" required>
+          <input id="custom-field" autofocus class="json" name="foo" required />
+          <code class="state"></code>
+        </auto-check>
+        <button>submit</button>
+      </form>
+    </main>
 
     <script>
       let focusedInput
