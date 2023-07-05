@@ -20,7 +20,7 @@
         <label for="simple-field">Desired username*:</label>
         <auto-check csrf="foo" src="/demo" required>
           <input id="simple-field" autofocus name="foo" required />
-          <code class="state"></code>
+          <code aria-live="polite" class="state"></code>
         </auto-check>
         <button value="1" name="form">submit</button>
       </form>
@@ -34,7 +34,7 @@
         <label for="custom-field">Desired username*:</label>
         <auto-check csrf="foo" src="/demo" required>
           <input id="custom-field" autofocus class="json" name="foo" required />
-          <code class="state"></code>
+          <code aria-live="polite" class="state"></code>
         </auto-check>
         <button value="2" name="form">submit</button>
       </form>
