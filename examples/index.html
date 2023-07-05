@@ -13,6 +13,7 @@
       <h1>auto-check-element</h1>
       <h2>Simple form</h2>
       <p>Input 422 for an error response.</p>
+      <p id="success1" class="success" hidden>Your submission was successful</p>
       <form>
         <p>All fields marked with * are required</p>
 
@@ -21,11 +22,12 @@
           <input id="simple-field" autofocus name="foo" required />
           <code class="state"></code>
         </auto-check>
-        <button>submit</button>
+        <button value="1" name="form">submit</button>
       </form>
 
       <h2>Form that has custom validity messages</h2>
       <p>Input 422 for an error response.</p>
+      <p id="success2" class="success" hidden>Your submission was successful</p>
       <form id="custom">
         <p>All fields marked with * are required</p>
 
@@ -34,11 +36,13 @@
           <input id="custom-field" autofocus class="json" name="foo" required />
           <code class="state"></code>
         </auto-check>
-        <button>submit</button>
+        <button value="2" name="form">submit</button>
       </form>
     </main>
 
     <script>
+      let successN = new URL(window.location).searchParams.get('form')
+      if (successN) document.getElementById(`success${successN}`).hidden = false
       let focusedInput
       const nativeFetch = window.fetch
       const fakeFetch = function (_, options) {
