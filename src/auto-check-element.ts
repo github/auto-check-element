@@ -30,7 +30,7 @@ class AutoCheckValidationEvent extends AutoCheckEvent {
     super(phase)
   }
 
-  setValidity(message: string) {
+  setValidity = (message: string) => {
     this.message = message
   }
 }
