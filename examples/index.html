@@ -73,9 +73,9 @@
         form.addEventListener('auto-check-error', event => {
           if (form.id === 'custom') {
             const {setValidity} = event.detail
-            setValidity('🚫 Something went wrong.')
+            setValidity('🚫 Something went wrong. Please try again')
           }
-          state.textContent = 'error'
+          state.textContent = 'something went wrong, please try again'
         })
         form.addEventListener('auto-check-complete', () => {
           if (state.textContent === 'loading') state.textContent = ''
