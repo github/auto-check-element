@@ -13,7 +13,7 @@
       <h1>auto-check-element</h1>
       <h2>Simple form</h2>
       <p>Input 422 for an error response.</p>
-      <p id="success1" class="success" hidden>Your submission was successful</p>
+      <h2 tabindex="-1" id="success1" class="success" hidden>Your submission was successful</h2>
       <form>
         <p>All fields marked with * are required</p>
 
@@ -27,7 +27,7 @@
 
       <h2>Form that has custom validity messages</h2>
       <p>Input 422 for an error response.</p>
-      <p id="success2" class="success" hidden>Your submission was successful</p>
+      <h2 tabindex="-1" id="success2" class="success" hidden>Your submission was successful</h2>
       <form id="custom">
         <p>All fields marked with * are required</p>
 
@@ -42,7 +42,10 @@
 
     <script>
       let successN = new URL(window.location).searchParams.get('form')
-      if (successN) document.getElementById(`success${successN}`).hidden = false
+      if (successN) {
+        document.getElementById(`success${successN}`).hidden = false
+        document.getElementById(`success${successN}`).focus()
+      }
       let focusedInput
       const nativeFetch = window.fetch
       const fakeFetch = function (_, options) {
