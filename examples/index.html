@@ -49,8 +49,18 @@
       let focusedInput
       const nativeFetch = window.fetch
       const fakeFetch = function (_, options) {
-        const path = `https://httpbin.org/status/${options.body.get('value') === '422' ? '422' : '200'}`
-        return nativeFetch(path, options)
+        if (options.body.get('value') === '422') {
+          return Promise.resolve(
+            new Response(JSON.stringify({message: '422'}), {
+              status: 422,
+            }),
+          )
+        }
+        return Promise.resolve(
+          new Response(JSON.stringify({message: 'success'}), {
+            status: 200,
+          }),
+        )
       }
       window.fetch = fakeFetch
 
