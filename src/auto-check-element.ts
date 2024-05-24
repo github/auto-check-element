@@ -198,7 +198,7 @@ function setLoadingState(event: Event) {
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || (isHttpPost && !csrf) || !state) {
+  if (!src || (this.httpMethod == 'POST' && !csrf) || !state) {
     return
   }
 
