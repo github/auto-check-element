@@ -263,7 +263,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
-  if (isHttpPost) {
+  if (this.httpMethod) {
     body.append(csrfField, csrf)
     body.append('value', input.value)
   } else {
