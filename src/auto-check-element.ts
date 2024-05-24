@@ -191,10 +191,11 @@ function setLoadingState(event: Event) {
 
   const src = autoCheckElement.src
   const csrf = autoCheckElement.csrf
+  const httpMethod = autoCheckElement.httpMethod
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || (this.httpMethod === 'POST' && !csrf) || !state) {
+  if (!src || (httpMethod === 'POST' && !csrf) || !state) {
     return
   }
 
@@ -242,9 +243,10 @@ async function check(autoCheckElement: AutoCheckElement) {
   const src = autoCheckElement.src
   const csrf = autoCheckElement.csrf
   const state = states.get(autoCheckElement)
+  const httpMethod = autoCheckElement.httpMethod
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || (this.httpMethod === 'POST' && !csrf) || !state) {
+  if (!src || (httpMethod === 'POST' && !csrf) || !state) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
@@ -259,7 +261,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
-  if (this.httpMethod === 'POST') {
+  if (httpMethod === 'POST') {
     body.append(csrfField, csrf)
     body.append('value', input.value)
   } else {
@@ -281,7 +283,7 @@ async function check(autoCheckElement: AutoCheckElement) {
     const response = await fetchWithNetworkEvents(autoCheckElement, src, {
       credentials: 'same-origin',
       signal: state.controller.signal,
-      method: this.httpMethod,
+      method: httpMethod,
       body,
     })
     if (response.ok) {
