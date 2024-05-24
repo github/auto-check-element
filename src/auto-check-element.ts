@@ -261,12 +261,12 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
+  const url = new URL(src, window.location.origin)
   if (httpMethod === 'POST') {
     body.append(csrfField, csrf)
     body.append('value', input.value)
   } else {
-    this.url = new URL(src, window.location.origin)
-    this.url.search = new URLSearchParams({value: input.value}).toString()
+    url.search = new URLSearchParams({value: input.value}).toString()
   }
 
   input.dispatchEvent(new AutoCheckSendEvent(body))
@@ -280,7 +280,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   state.controller = makeAbortController()
 
   try {
-    const response = await fetchWithNetworkEvents(autoCheckElement, src, {
+    const response = await fetchWithNetworkEvents(autoCheckElement, url.toString(), {
       credentials: 'same-origin',
       signal: state.controller.signal,
       method: httpMethod,
