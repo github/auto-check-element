@@ -267,7 +267,7 @@ async function check(autoCheckElement: AutoCheckElement) {
     body.append(csrfField, csrf)
     body.append('value', input.value)
   } else {
-    url = new URL(src);
+    url = new URL(src, window.location.origin);
     url.search = new URLSearchParams({ value: input.value }).toString();
   }
 
