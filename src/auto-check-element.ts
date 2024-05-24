@@ -180,10 +180,6 @@ export class AutoCheckElement extends HTMLElement {
   get httpMethod(): string {
     return this.getAttribute('http-method') || 'POST'
   }
-
-  get isHttpPost(): bool {
-    return this.httpMethod == 'POST'
-  }
 }
 
 function setLoadingState(event: Event) {
