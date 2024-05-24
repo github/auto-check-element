@@ -47,6 +47,7 @@ Note that in the following example the CSRF element is marked with the `data-csr
 - `csrf` is the [CSRF][] token for the posted form. It's available in the request body as a `authenticity_token` form parameter.
   - You can also supply the CSRF token via a child element. See [usage](#Usage) example.
 - `required` is a boolean attribute that requires the validation to succeed before the surrounding form may be submitted.
+- `http-method` defaults to `POST` where data is submitted as a POST with form data. You can set `GET` and the HTTP method used will be a get with url encoded params instead.
 
 ## Events
 
