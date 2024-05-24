@@ -194,7 +194,7 @@ function setLoadingState(event: Event) {
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || (this.httpMethod == 'POST' && !csrf) || !state) {
+  if (!src || (httpMethod === 'POST' && !csrf) || !state) {
     return
   }
 
@@ -244,7 +244,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || (this.httpMethod && !csrf) || !state) {
+  if (!src || (httpMethod && !csrf) || !state) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
@@ -259,12 +259,12 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
-  if (this.httpMethod) {
+  if (httpMethod === 'POST') {
     body.append(csrfField, csrf)
     body.append('value', input.value)
   } else {
-    url = new URL(src, window.location.origin);
-    url.search = new URLSearchParams({ value: input.value }).toString();
+    url = new URL(src, window.location.origin)
+    url.search = new URLSearchParams({value: input.value}).toString()
   }
 
   input.dispatchEvent(new AutoCheckSendEvent(body))
