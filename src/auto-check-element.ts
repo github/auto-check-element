@@ -176,6 +176,14 @@ export class AutoCheckElement extends HTMLElement {
   set csrfField(value: string) {
     this.setAttribute('csrf-field', value)
   }
+
+  get httpMethod(): string {
+    return this.getAttribute('http-method') || 'POST'
+  }
+
+  get isHttpPost(): bool {
+    return this.httpMethod == 'POST'
+  }
 }
 
 function setLoadingState(event: Event) {
@@ -190,7 +198,7 @@ function setLoadingState(event: Event) {
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || !csrf || !state) {
+  if (!src || (isHttpPost && !csrf) || !state) {
     return
   }
 
@@ -240,7 +248,7 @@ async function check(autoCheckElement: AutoCheckElement) {
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || !csrf || !state) {
+  if (!src || (isHttpPost && !csrf) || !state) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
@@ -255,8 +263,13 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
-  body.append(csrfField, csrf)
-  body.append('value', input.value)
+  if (isHttpPost) {
+    body.append(csrfField, csrf)
+    body.append('value', input.value)
+  } else {
+    url = new URL(src);
+    url.search = new URLSearchParams({ value: input.value }).toString();
+  }
 
   input.dispatchEvent(new AutoCheckSendEvent(body))
 
@@ -272,7 +285,7 @@ async function check(autoCheckElement: AutoCheckElement) {
     const response = await fetchWithNetworkEvents(autoCheckElement, src, {
       credentials: 'same-origin',
       signal: state.controller.signal,
-      method: 'POST',
+      method: httpMethod,
       body,
     })
     if (response.ok) {
