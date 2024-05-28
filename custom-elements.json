@@ -56,16 +56,8 @@
           },
           "members": [
             {
-              "kind": "method",
+              "kind": "field",
               "name": "setValidity",
-              "parameters": [
-                {
-                  "name": "message",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
               "inheritedFrom": {
                 "name": "AutoCheckValidationEvent",
                 "module": "src/auto-check-element.ts"
@@ -92,16 +84,8 @@
           },
           "members": [
             {
-              "kind": "method",
+              "kind": "field",
               "name": "setValidity",
-              "parameters": [
-                {
-                  "name": "message",
-                  "type": {
-                    "text": "string"
-                  }
-                }
-              ],
               "inheritedFrom": {
                 "name": "AutoCheckValidationEvent",
                 "module": "src/auto-check-element.ts"
@@ -206,6 +190,14 @@
               "type": {
                 "text": "string"
               }
+            },
+            {
+              "kind": "field",
+              "name": "httpMethod",
+              "type": {
+                "text": "string"
+              },
+              "readonly": true
             }
           ],
           "attributes": [
