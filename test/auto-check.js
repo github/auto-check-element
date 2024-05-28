@@ -114,6 +114,35 @@ describe('auto-check element', function () {
     })
   })
 
+  describe('using HTTP GET', function () {
+    let checker
+    let input
+
+    beforeEach(function () {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check src="/success" http-method="GET" required>
+          <input>
+        </auto-check>`
+      document.body.append(container)
+
+      checker = document.querySelector('auto-check')
+      input = checker.querySelector('input')
+    })
+
+    afterEach(function () {
+      document.body.innerHTML = ''
+      checker = null
+      input = null
+    })
+
+    it('validates input with successful server response with GET', async function () {
+      triggerInput(input, 'hub')
+      await once(input, 'auto-check-complete')
+      assert.isTrue(input.checkValidity())
+    })
+  })
+
   describe('network lifecycle events', function () {
     let checker
     let input

@@ -219,6 +219,9 @@ function makeAbortController() {
 }
 
 async function fetchWithNetworkEvents(el: Element, url: string, options: RequestInit): Promise<Response> {
+  if (options.method === 'GET') {
+    delete options.body
+  }
   try {
     const response = await fetch(url, options)
     el.dispatchEvent(new Event('load'))
