@@ -19,7 +19,7 @@ export default {
   middleware: [
     async ({request, response}, next) => {
       const {method, path} = request
-      if (method === 'POST') {
+      if (method === 'POST' || method === 'GET') {
         if (path.startsWith('/fail')) {
           response.status = 422
           // eslint-disable-next-line i18n-text/no-en

@@ -12,6 +12,11 @@ type State = {
   controller: Controller | null
 }
 
+enum AllowedHttpMethods {
+  GET = 'GET',
+  POST = 'POST',
+}
+
 const states = new WeakMap<AutoCheckElement, State>()
 
 class AutoCheckEvent extends Event {
@@ -176,6 +181,10 @@ export class AutoCheckElement extends HTMLElement {
   set csrfField(value: string) {
     this.setAttribute('csrf-field', value)
   }
+
+  get httpMethod(): string {
+    return AllowedHttpMethods[this.getAttribute('http-method') as keyof typeof AllowedHttpMethods] || 'POST'
+  }
 }
 
 function setLoadingState(event: Event) {
@@ -187,10 +196,11 @@ function setLoadingState(event: Event) {
 
   const src = autoCheckElement.src
   const csrf = autoCheckElement.csrf
+  const httpMethod = autoCheckElement.httpMethod
   const state = states.get(autoCheckElement)
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || !csrf || !state) {
+  if (!src || (httpMethod === 'POST' && !csrf) || !state) {
     return
   }
 
@@ -214,6 +224,9 @@ function makeAbortController() {
 }
 
 async function fetchWithNetworkEvents(el: Element, url: string, options: RequestInit): Promise<Response> {
+  if (options.method === 'GET') {
+    delete options.body
+  }
   try {
     const response = await fetch(url, options)
     el.dispatchEvent(new Event('load'))
@@ -238,9 +251,10 @@ async function check(autoCheckElement: AutoCheckElement) {
   const src = autoCheckElement.src
   const csrf = autoCheckElement.csrf
   const state = states.get(autoCheckElement)
+  const httpMethod = autoCheckElement.httpMethod
 
   // If some attributes are missing we want to exit early and make sure that the element is valid.
-  if (!src || !csrf || !state) {
+  if (!src || (httpMethod === 'POST' && !csrf) || !state) {
     if (autoCheckElement.required) {
       input.setCustomValidity('')
     }
@@ -255,8 +269,13 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   const body = new FormData()
-  body.append(csrfField, csrf)
-  body.append('value', input.value)
+  const url = new URL(src, window.location.origin)
+  if (httpMethod === 'POST') {
+    body.append(csrfField, csrf)
+    body.append('value', input.value)
+  } else {
+    url.search = new URLSearchParams({value: input.value}).toString()
+  }
 
   input.dispatchEvent(new AutoCheckSendEvent(body))
 
@@ -269,10 +288,10 @@ async function check(autoCheckElement: AutoCheckElement) {
   state.controller = makeAbortController()
 
   try {
-    const response = await fetchWithNetworkEvents(autoCheckElement, src, {
+    const response = await fetchWithNetworkEvents(autoCheckElement, url.toString(), {
       credentials: 'same-origin',
       signal: state.controller.signal,
-      method: 'POST',
+      method: httpMethod,
       body,
     })
     if (response.ok) {
