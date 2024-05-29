@@ -12,6 +12,11 @@ type State = {
   controller: Controller | null
 }
 
+enum AllowedHttpMethods {
+  GET = 'GET',
+  POST = 'POST',
+}
+
 const states = new WeakMap<AutoCheckElement, State>()
 
 class AutoCheckEvent extends Event {
@@ -178,7 +183,7 @@ export class AutoCheckElement extends HTMLElement {
   }
 
   get httpMethod(): string {
-    return this.getAttribute('http-method') || 'POST'
+    return AllowedHttpMethods[this.getAttribute('http-method') as keyof typeof AllowedHttpMethods] || 'POST'
   }
 }
 
