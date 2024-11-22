@@ -22,6 +22,36 @@ describe('auto-check element', function () {
     })
   })
 
+  describe('when validate-after-first-blur is true', function () {
+    let checker
+    let input
+
+    beforeEach(function () {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check csrf="foo" src="/success" validate-after-first-blur>
+          <input>
+        </auto-check>`
+      document.body.append(container)
+
+      checker = document.querySelector('auto-check')
+      input = checker.querySelector('input')
+    })
+
+    it('does not emit on initial input change', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerInput(input, 'hub')
+      assert.deepEqual(events, [])
+    })
+
+    afterEach(function () {
+      document.body.innerHTML = ''
+      checker = null
+      input = null
+    })
+  })
+
   describe('required attribute', function () {
     let checker
     let input

@@ -101,12 +101,18 @@ export class AutoCheckElement extends HTMLElement {
     const input = this.input
     if (!input) return
 
+    if (!this.validateAfterFirstBlur) {
+      this.setAttribute('should-validate', '')
+    }
+
     const checker = debounce(check.bind(null, this), 300)
     const state = {check: checker, controller: null}
     states.set(this, state)
 
-    input.addEventListener('input', setLoadingState)
-    input.addEventListener('input', checker)
+    const changeHandler = handleChange.bind(null, checker)
+
+    input.addEventListener('blur', changeHandler)
+    input.addEventListener('input', changeHandler)
     input.autocomplete = 'off'
     input.spellcheck = false
   }
@@ -184,6 +190,36 @@ export class AutoCheckElement extends HTMLElement {
 
   get httpMethod(): string {
     return AllowedHttpMethods[this.getAttribute('http-method') as keyof typeof AllowedHttpMethods] || 'POST'
+  }
+
+  get validateAfterFirstBlur(): boolean {
+    const value = this.getAttribute('validate-after-first-blur')
+    return value === 'true' || value === ''
+  }
+
+  get shouldValidate(): boolean {
+    const value = this.getAttribute('should-validate')
+    return value === 'true' || value === ''
+  }
+}
+
+function handleChange(checker: () => void, event: Event) {
+  const input = event.currentTarget
+  if (!(input instanceof HTMLInputElement)) return
+
+  const autoCheckElement = input.closest('auto-check')
+  if (!(autoCheckElement instanceof AutoCheckElement)) return
+
+  if (event.type === 'blur') {
+    if (autoCheckElement.validateAfterFirstBlur && !autoCheckElement.shouldValidate) {
+      autoCheckElement.setAttribute('should-validate', '')
+
+      checker()
+      setLoadingState(event)
+    }
+  } else if (autoCheckElement.shouldValidate) {
+    checker()
+    setLoadingState(event)
   }
 }
 

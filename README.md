@@ -1,3 +1,5 @@
+# TODO: Should we switch back out of always-on validation once the input passes validation, or stay in always-on?
+
 # &lt;auto-check&gt; element
 
 An input element that validates its value against a server endpoint.
@@ -157,6 +159,9 @@ Browsers without native [custom element support][support] require a [polyfill][]
 npm install
 npm test
 ```
+
+TODO: Add note about uncommenting line at bottom of examples for local development
+Input something other than 422 for error response?
 
 ## License
 

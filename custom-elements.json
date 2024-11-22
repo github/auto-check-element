@@ -198,6 +198,22 @@
                 "text": "string"
               },
               "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "validateAfterFirstBlur",
+              "type": {
+                "text": "boolean"
+              },
+              "readonly": true
+            },
+            {
+              "kind": "field",
+              "name": "shouldValidate",
+              "type": {
+                "text": "boolean"
+              },
+              "readonly": true
             }
           ],
           "attributes": [
