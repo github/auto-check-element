@@ -101,10 +101,6 @@ export class AutoCheckElement extends HTMLElement {
     const input = this.input
     if (!input) return
 
-    if (!this.onlyValidateOnBlur) {
-      this.setAttribute('validate-on-keystroke', '')
-    }
-
     const checker = debounce(check.bind(null, this), 300)
     const state = {check: checker, controller: null}
     states.set(this, state)
