@@ -22,7 +22,7 @@
         <button value="1" name="form">submit</button>
       </form>
 
-      <!-- <h2>Form that has custom validity messages</h2>
+      <h2>Form that has custom validity messages</h2>
       <p>Input 422 for an error response.</p>
       <h2 tabindex="-1" id="success2" class="success" hidden>Your submission was successful</h2>
       <form id="custom">
@@ -34,13 +34,13 @@
           <p id="state2" aria-atomic="true" aria-live="polite" class="state"></p>
         </auto-check>
         <button value="2" name="form">submit</button>
-      </form> -->
+      </form>
 
-      <h2>validate-after-first-blur</h2>
+      <h2>only-validate-on-blur</h2>
       <h2 tabindex="-1" id="success3" class="success" hidden>Your submission was successful</h2>
       <form>
         <label for="simple-field2">Desired username*:</label>
-        <auto-check csrf="foo" src="/demo" required validate-after-first-blur>
+        <auto-check csrf="foo" src="/demo" required only-validate-on-blur>
           <input id="simple-field2" autofocus name="foo" required aria-describedby="state3" />
           <p id="state3" aria-atomic="true" aria-live="polite" class="state"></p>
         </auto-check>

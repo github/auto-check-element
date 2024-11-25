@@ -101,8 +101,8 @@ export class AutoCheckElement extends HTMLElement {
     const input = this.input
     if (!input) return
 
-    if (!this.validateAfterFirstBlur) {
-      this.setAttribute('should-validate', '')
+    if (!this.onlyValidateOnBlur) {
+      this.setAttribute('validate-on-keystroke', '')
     }
 
     const checker = debounce(check.bind(null, this), 300)
@@ -192,13 +192,21 @@ export class AutoCheckElement extends HTMLElement {
     return AllowedHttpMethods[this.getAttribute('http-method') as keyof typeof AllowedHttpMethods] || 'POST'
   }
 
-  get validateAfterFirstBlur(): boolean {
-    const value = this.getAttribute('validate-after-first-blur')
+  get onlyValidateOnBlur(): boolean {
+    const value = this.getAttribute('only-validate-on-blur')
     return value === 'true' || value === ''
   }
 
-  get shouldValidate(): boolean {
-    const value = this.getAttribute('should-validate')
+  set validateOnKeystroke(enabled: boolean) {
+    if (enabled) {
+      this.setAttribute('validate-on-keystroke', '')
+    } else {
+      this.removeAttribute('validate-on-keystroke')
+    }
+  }
+
+  get validateOnKeystroke(): boolean {
+    const value = this.getAttribute('validate-on-keystroke')
     return value === 'true' || value === ''
   }
 }
@@ -213,9 +221,9 @@ function handleChange(checker: () => void, event: Event) {
   if (input.value.length === 0) return
 
   if (
-    (event.type !== 'blur' && !autoCheckElement.validateAfterFirstBlur) || // Existing default behavior
-    (event.type === 'blur' && autoCheckElement.validateAfterFirstBlur) || // Only validate on blur if validate-after-first-blur is set
-    (autoCheckElement.validateAfterFirstBlur && autoCheckElement.shouldValidate) // Only validate on key inputs in validate-after-first-blur mode if should-validate is set (when input is invalid)
+    (event.type !== 'blur' && !autoCheckElement.onlyValidateOnBlur) || // Existing default behavior
+    (event.type === 'blur' && autoCheckElement.onlyValidateOnBlur) || // Only validate on blur if only-validate-on-blur is set
+    (autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
   ) {
     checker()
     setLoadingState(event)
@@ -333,12 +341,18 @@ async function check(autoCheckElement: AutoCheckElement) {
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
-      if (autoCheckElement.validateAfterFirstBlur) {
-        autoCheckElement.removeAttribute('should-validate')
+      // We do not have good test coverage for this code path.
+      // To test, ensure that the input only validates on blur
+      // once it has been "healed" by a valid input after
+      // previously being in an invalid state.
+      if (autoCheckElement.onlyValidateOnBlur) {
+        autoCheckElement.validateOnKeystroke = false
       }
       input.dispatchEvent(new AutoCheckSuccessEvent(response.clone()))
     } else {
-      autoCheckElement.setAttribute('should-validate', '')
+      if (autoCheckElement.onlyValidateOnBlur) {
+        autoCheckElement.validateOnKeystroke = true
+      }
       const event = new AutoCheckErrorEvent(response.clone())
       input.dispatchEvent(event)
       if (autoCheckElement.required) {

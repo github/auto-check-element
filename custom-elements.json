@@ -201,7 +201,7 @@
             },
             {
               "kind": "field",
-              "name": "validateAfterFirstBlur",
+              "name": "onlyValidateOnBlur",
               "type": {
                 "text": "boolean"
               },
@@ -209,11 +209,10 @@
             },
             {
               "kind": "field",
-              "name": "shouldValidate",
+              "name": "validateOnKeystroke",
               "type": {
                 "text": "boolean"
-              },
-              "readonly": true
+              }
             }
           ],
           "attributes": [
