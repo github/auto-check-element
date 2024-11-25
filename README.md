@@ -158,7 +158,7 @@ npm install
 npm test
 ```
 
-TODO: Add note about uncommenting line at bottom of examples for local development
+For local development, uncomment the line at the bottom of `examples/index` and serve the page using `npx serve`.
 
 ## License
 
