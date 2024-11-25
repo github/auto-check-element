@@ -210,14 +210,13 @@ function handleChange(checker: () => void, event: Event) {
   const autoCheckElement = input.closest('auto-check')
   if (!(autoCheckElement instanceof AutoCheckElement)) return
 
-  if (event.type === 'blur') {
-    if (autoCheckElement.validateAfterFirstBlur && !autoCheckElement.shouldValidate) {
-      autoCheckElement.setAttribute('should-validate', '')
+  if (input.value.length === 0) return
 
-      checker()
-      setLoadingState(event)
-    }
-  } else if (autoCheckElement.shouldValidate) {
+  if (
+    (event.type !== 'blur' && !autoCheckElement.validateAfterFirstBlur) || // Existing default behavior
+    (event.type === 'blur' && autoCheckElement.validateAfterFirstBlur) || // Only validate on blur if validate-after-first-blur is set
+    (autoCheckElement.validateAfterFirstBlur && autoCheckElement.shouldValidate) // Only validate on key inputs in validate-after-first-blur mode if should-validate is set (when input is invalid)
+  ) {
     checker()
     setLoadingState(event)
   }
@@ -334,8 +333,12 @@ async function check(autoCheckElement: AutoCheckElement) {
       if (autoCheckElement.required) {
         input.setCustomValidity('')
       }
+      if (autoCheckElement.validateAfterFirstBlur) {
+        autoCheckElement.removeAttribute('should-validate')
+      }
       input.dispatchEvent(new AutoCheckSuccessEvent(response.clone()))
     } else {
+      autoCheckElement.setAttribute('should-validate', '')
       const event = new AutoCheckErrorEvent(response.clone())
       input.dispatchEvent(event)
       if (autoCheckElement.required) {
