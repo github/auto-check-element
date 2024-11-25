@@ -11,9 +11,11 @@
   <body>
     <main>
       <h1>auto-check-element</h1>
-      <h2>old behavior</h2>
+      <h2>Simple form</h2>
       <h2 tabindex="-1" id="success1" class="success" hidden>Your submission was successful</h2>
       <form>
+        <p>All fields marked with * are required</p>
+
         <label for="simple-field">Desired username*:</label>
         <auto-check csrf="foo" src="/demo" required>
           <input id="simple-field" autofocus name="foo" required aria-describedby="state1" />
@@ -104,7 +106,7 @@
       }
     </script>
 
-    <!-- <script type="module" src="https://unpkg.com/@github/auto-check-element@latest"></script> -->
-    <script type="module" src="../dist/bundle.js" defer></script>
+    <script type="module" src="https://unpkg.com/@github/auto-check-element@latest"></script>
+    <!-- <script type="module" src="../dist/bundle.js" defer></script> -->
   </body>
 </html>
