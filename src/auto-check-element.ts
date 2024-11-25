@@ -188,11 +188,6 @@ export class AutoCheckElement extends HTMLElement {
     return AllowedHttpMethods[this.getAttribute('http-method') as keyof typeof AllowedHttpMethods] || 'POST'
   }
 
-  get onlyValidateOnBlur(): boolean {
-    const value = this.getAttribute('only-validate-on-blur')
-    return value === 'true' || value === ''
-  }
-
   set validateOnKeystroke(enabled: boolean) {
     if (enabled) {
       this.setAttribute('validate-on-keystroke', '')
@@ -203,6 +198,11 @@ export class AutoCheckElement extends HTMLElement {
 
   get validateOnKeystroke(): boolean {
     const value = this.getAttribute('validate-on-keystroke')
+    return value === 'true' || value === ''
+  }
+
+  get onlyValidateOnBlur(): boolean {
+    const value = this.getAttribute('only-validate-on-blur')
     return value === 'true' || value === ''
   }
 }

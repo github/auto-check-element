@@ -201,18 +201,18 @@
             },
             {
               "kind": "field",
+              "name": "validateOnKeystroke",
+              "type": {
+                "text": "boolean"
+              }
+            },
+            {
+              "kind": "field",
               "name": "onlyValidateOnBlur",
               "type": {
                 "text": "boolean"
               },
               "readonly": true
-            },
-            {
-              "kind": "field",
-              "name": "validateOnKeystroke",
-              "type": {
-                "text": "boolean"
-              }
             }
           ],
           "attributes": [
