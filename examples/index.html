@@ -38,9 +38,9 @@
         <button value="2" name="form">submit</button>
       </form>
 
-      <h2>only-validate-on-blur</h2>
+      <h2>only-validate-on-blur with custom validity messages</h2>
       <h2 tabindex="-1" id="success3" class="success" hidden>Your submission was successful</h2>
-      <form>
+      <form id="custom2">
         <p>All fields marked with * are required</p>
 
         <label for="simple-field2">Desired username*:</label>
@@ -86,7 +86,7 @@
         })
 
         form.addEventListener('auto-check-start', () => {
-          if (form.id === 'custom') {
+          if (form.id.includes('custom')) {
             const {setValidity} = event.detail
             setValidity('🔍 Checking validity...')
           }
@@ -96,7 +96,7 @@
           state.textContent = 'succeeded'
         })
         form.addEventListener('auto-check-error', event => {
-          if (form.id === 'custom') {
+          if (form.id.includes('custom')) {
             const {setValidity} = event.detail
             setValidity('🚫 Something went wrong. Please try again')
           }
