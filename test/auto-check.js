@@ -22,6 +22,65 @@ describe('auto-check element', function () {
     })
   })
 
+  describe('when only-validate-on-blur is true', function () {
+    let checker
+    let input
+
+    beforeEach(function () {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check csrf="foo" src="/success" only-validate-on-blur>
+          <input>
+        </auto-check>`
+      document.body.append(container)
+
+      checker = document.querySelector('auto-check')
+      input = checker.querySelector('input')
+    })
+
+    it('does not emit on initial input change', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerInput(input, 'hub')
+      assert.deepEqual(events, [])
+    })
+
+    it('does not emit on blur if input is blank', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerBlur(input)
+      assert.deepEqual(events, [])
+    })
+
+    it('emits on blur', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerInput(input, 'hub')
+      triggerBlur(input)
+      assert.deepEqual(events, ['auto-check-start'])
+    })
+
+    it('emits on input change if input is invalid after blur', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+
+      checker.src = '/fail'
+      triggerInput(input, 'hub')
+      triggerBlur(input)
+      await once(input, 'auto-check-complete')
+      triggerInput(input, 'hub2')
+      triggerInput(input, 'hub3')
+
+      assert.deepEqual(events, ['auto-check-start', 'auto-check-start', 'auto-check-start'])
+    })
+
+    afterEach(function () {
+      document.body.innerHTML = ''
+      checker = null
+      input = null
+    })
+  })
+
   describe('required attribute', function () {
     let checker
     let input
@@ -330,4 +389,8 @@ function once(element, eventName) {
 function triggerInput(input, value) {
   input.value = value
   return input.dispatchEvent(new InputEvent('input'))
+}
+
+function triggerBlur(input) {
+  return input.dispatchEvent(new FocusEvent('blur'))
 }

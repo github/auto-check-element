@@ -158,6 +158,8 @@ npm install
 npm test
 ```
 
+For local development, uncomment the line at the bottom of `examples/index` and serve the page using `npx serve`.
+
 ## License
 
 Distributed under the MIT license. See LICENSE for details.
