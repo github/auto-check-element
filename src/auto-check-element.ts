@@ -221,8 +221,8 @@ function handleChange(checker: () => void, event: Event) {
     (event.type === 'blur' && autoCheckElement.onlyValidateOnBlur) || // Only validate on blur if only-validate-on-blur is set
     (autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
   ) {
-    checker()
     setLoadingState(event)
+    checker()
   }
 }
 
