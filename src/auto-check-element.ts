@@ -214,12 +214,19 @@ function handleChange(checker: () => void, event: Event) {
   const autoCheckElement = input.closest('auto-check')
   if (!(autoCheckElement instanceof AutoCheckElement)) return
 
+  if (event.type === 'input') {
+    autoCheckElement.setAttribute('dirty', '')
+  }
+
   if (input.value.length === 0) return
 
   if (
     (event.type !== 'blur' && !autoCheckElement.onlyValidateOnBlur) || // Existing default behavior
-    (event.type === 'blur' && autoCheckElement.onlyValidateOnBlur) || // Only validate on blur if only-validate-on-blur is set
-    (autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
+    (event.type === 'blur' &&
+      autoCheckElement.onlyValidateOnBlur &&
+      !autoCheckElement.validateOnKeystroke &&
+      autoCheckElement.hasAttribute('dirty')) || // Only validate on blur if only-validate-on-blur is set, input is dirty, and input is not current validating on keystroke
+    (event.type === 'input' && autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
   ) {
     setLoadingState(event)
     checker()
@@ -325,6 +332,8 @@ async function check(autoCheckElement: AutoCheckElement) {
   }
 
   state.controller = makeAbortController()
+
+  autoCheckElement.removeAttribute('dirty')
 
   try {
     const response = await fetchWithNetworkEvents(autoCheckElement, url.toString(), {

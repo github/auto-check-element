@@ -60,6 +60,18 @@ describe('auto-check element', function () {
       assert.deepEqual(events, ['auto-check-start'])
     })
 
+    it('does not emit on blur if input has not changed after initial blur', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+      triggerInput(input, 'hub')
+      triggerBlur(input)
+
+      await once(input, 'auto-check-complete')
+      triggerBlur(input)
+
+      assert.deepEqual(events, ['auto-check-start'])
+    })
+
     it('emits on input change if input is invalid after blur', async function () {
       const events = []
       input.addEventListener('auto-check-start', event => events.push(event.type))
@@ -69,6 +81,23 @@ describe('auto-check element', function () {
       triggerBlur(input)
       await once(input, 'auto-check-complete')
       triggerInput(input, 'hub2')
+      triggerInput(input, 'hub3')
+
+      assert.deepEqual(events, ['auto-check-start', 'auto-check-start', 'auto-check-start'])
+    })
+
+    it('does not emit on blur if input is invalid', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+
+      checker.src = '/fail'
+      triggerInput(input, 'hub')
+      triggerBlur(input)
+      await once(input, 'auto-check-complete')
+
+      triggerInput(input, 'hub2')
+      triggerBlur(input)
+
       triggerInput(input, 'hub3')
 
       assert.deepEqual(events, ['auto-check-start', 'auto-check-start', 'auto-check-start'])
