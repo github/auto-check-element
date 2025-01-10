@@ -141,7 +141,7 @@ input.addEventListener('auto-check-complete', function(event) {
 
 ## Manually Trigger Validation
 
-The `triggerValidation()` function can be used to manually tigger the `<auto-check>` element.
+The `triggerValidation()` function can be used to manually trigger the `<auto-check>` element.
 
 ```js
 document.getElementById('input-element').closest('auto-check').triggerValidation()
