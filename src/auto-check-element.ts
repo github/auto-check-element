@@ -109,6 +109,7 @@ export class AutoCheckElement extends HTMLElement {
 
     input.addEventListener('blur', changeHandler)
     input.addEventListener('input', changeHandler)
+    input.addEventListener('triggerValidation', changeHandler)
     input.autocomplete = 'off'
     input.spellcheck = false
   }
@@ -132,6 +133,13 @@ export class AutoCheckElement extends HTMLElement {
       if (!input) return
       input.required = this.required
     }
+  }
+
+  triggerValidation(): void {
+    const input = this.input
+    if (!input) return
+
+    input.dispatchEvent(new Event('triggerValidation'))
   }
 
   static get observedAttributes(): string[] {
@@ -226,7 +234,8 @@ function handleChange(checker: () => void, event: Event) {
       autoCheckElement.onlyValidateOnBlur &&
       !autoCheckElement.validateOnKeystroke &&
       autoCheckElement.hasAttribute('dirty')) || // Only validate on blur if only-validate-on-blur is set, input is dirty, and input is not current validating on keystroke
-    (event.type === 'input' && autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
+    (event.type === 'input' && autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) || // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
+    event.type === 'triggerValidation' // Trigger validation manually
   ) {
     setLoadingState(event)
     checker()

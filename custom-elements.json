@@ -156,6 +156,15 @@
               "name": "onloadend"
             },
             {
+              "kind": "method",
+              "name": "triggerValidation",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
               "kind": "field",
               "name": "input",
               "type": {

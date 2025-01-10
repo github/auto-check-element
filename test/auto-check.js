@@ -202,6 +202,48 @@ describe('auto-check element', function () {
     })
   })
 
+  describe('manually triggering validation', function () {
+    let checker
+    let input
+
+    beforeEach(function () {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <auto-check csrf="foo" src="/success" required>
+          <input id="input-field" value="hub">
+        </auto-check>`
+      document.body.append(container)
+
+      checker = document.querySelector('auto-check')
+      input = checker.querySelector('input')
+    })
+
+    it('emits on manual trigger', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+
+      document.getElementById('input-field').closest('auto-check').triggerValidation()
+
+      assert.deepEqual(events, ['auto-check-start'])
+    })
+
+    it('does not emit on manual trigger if input is empty', async function () {
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+
+      input.value = ''
+      document.getElementById('input-field').closest('auto-check').triggerValidation()
+
+      assert.deepEqual(events, [])
+    })
+
+    afterEach(function () {
+      document.body.innerHTML = ''
+      checker = null
+      input = null
+    })
+  })
+
   describe('using HTTP GET', function () {
     let checker
     let input
