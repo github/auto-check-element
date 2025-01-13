@@ -139,6 +139,14 @@ input.addEventListener('auto-check-complete', function(event) {
 [CSRF]: https://en.wikipedia.org/wiki/Cross-site_request_forgery
 [Response]: https://developer.mozilla.org/en-US/docs/Web/API/Response
 
+## Manually Trigger Validation
+
+The `triggerValidation()` function can be used to manually trigger the `<auto-check>` element.
+
+```js
+document.getElementById('input-element').closest('auto-check').triggerValidation()
+```
+
 ## Browser support
 
 Browsers without native [custom element support][support] require a [polyfill][].
