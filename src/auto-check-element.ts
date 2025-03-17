@@ -208,11 +208,6 @@ export class AutoCheckElement extends HTMLElement {
     const value = this.getAttribute('validate-on-keystroke')
     return value === 'true' || value === ''
   }
-
-  get onlyValidateOnBlur(): boolean {
-    const value = this.getAttribute('only-validate-on-blur')
-    return value === 'true' || value === ''
-  }
 }
 
 function handleChange(checker: () => void, event: Event) {
@@ -229,12 +224,8 @@ function handleChange(checker: () => void, event: Event) {
   if (input.value.length === 0) return
 
   if (
-    (event.type !== 'blur' && !autoCheckElement.onlyValidateOnBlur) || // Existing default behavior
-    (event.type === 'blur' &&
-      autoCheckElement.onlyValidateOnBlur &&
-      !autoCheckElement.validateOnKeystroke &&
-      autoCheckElement.hasAttribute('dirty')) || // Only validate on blur if only-validate-on-blur is set, input is dirty, and input is not current validating on keystroke
-    (event.type === 'input' && autoCheckElement.onlyValidateOnBlur && autoCheckElement.validateOnKeystroke) || // Only validate on key inputs in only-validate-on-blur mode if validate-on-keystroke is set (when input is invalid)
+    (event.type === 'blur' && !autoCheckElement.validateOnKeystroke && autoCheckElement.hasAttribute('dirty')) || // Only validate on blur if input is dirty and input is not current validating on keystroke
+    (event.type === 'input' && autoCheckElement.validateOnKeystroke) || // Only validate on key inputs if validate-on-keystroke is set (when input is invalid)
     event.type === 'triggervalidation' // Trigger validation manually
   ) {
     setLoadingState(event)
@@ -359,14 +350,10 @@ async function check(autoCheckElement: AutoCheckElement) {
       // To test, ensure that the input only validates on blur
       // once it has been "healed" by a valid input after
       // previously being in an invalid state.
-      if (autoCheckElement.onlyValidateOnBlur) {
-        autoCheckElement.validateOnKeystroke = false
-      }
+      autoCheckElement.validateOnKeystroke = false
       input.dispatchEvent(new AutoCheckSuccessEvent(response.clone()))
     } else {
-      if (autoCheckElement.onlyValidateOnBlur) {
-        autoCheckElement.validateOnKeystroke = true
-      }
+      autoCheckElement.validateOnKeystroke = true
       const event = new AutoCheckErrorEvent(response.clone())
       input.dispatchEvent(event)
       if (autoCheckElement.required) {
