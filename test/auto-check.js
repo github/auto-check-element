@@ -22,14 +22,14 @@ describe('auto-check element', function () {
     })
   })
 
-  describe('when only-validate-on-blur is true', function () {
+  describe('blur event functionality', function () {
     let checker
     let input
 
     beforeEach(function () {
       const container = document.createElement('div')
       container.innerHTML = `
-        <auto-check csrf="foo" src="/success" only-validate-on-blur>
+        <auto-check csrf="foo" src="/success">
           <input>
         </auto-check>`
       document.body.append(container)
@@ -137,15 +137,17 @@ describe('auto-check element', function () {
       assert.isFalse(input.checkValidity())
     })
 
-    it('invalidates the input element on keypress', async function () {
+    it('invalidates the input element on blur', async function () {
       const inputEvent = once(input, 'input')
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await inputEvent
       assert.isFalse(input.checkValidity())
     })
 
     it('invalidates input request is in-flight', async function () {
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await once(checker, 'loadstart')
       assert.isFalse(input.checkValidity())
     })
@@ -153,12 +155,14 @@ describe('auto-check element', function () {
     it('invalidates input with failed server response', async function () {
       checker.src = '/fail'
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await once(input, 'auto-check-complete')
       assert.isFalse(input.checkValidity())
     })
 
     it('validates input with successful server response', async function () {
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await once(input, 'auto-check-complete')
       assert.isTrue(input.checkValidity())
     })
@@ -171,6 +175,7 @@ describe('auto-check element', function () {
           resolve()
         })
         triggerInput(input, 'hub')
+        triggerBlur(input)
       })
       await send
       assert(!input.validity.valid)
@@ -185,6 +190,7 @@ describe('auto-check element', function () {
           resolve()
         })
         triggerInput(input, 'hub')
+        triggerBlur(input)
       })
       await error
       assert(!input.validity.valid)
@@ -197,6 +203,7 @@ describe('auto-check element', function () {
       input.value = 'hub'
       assert.isTrue(input.checkValidity())
       input.dispatchEvent(new InputEvent('input'))
+      triggerBlur(input)
       await once(input, 'auto-check-complete')
       assert.isTrue(input.checkValidity())
     })
@@ -268,6 +275,7 @@ describe('auto-check element', function () {
 
     it('validates input with successful server response with GET', async function () {
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await once(input, 'auto-check-complete')
       assert.isTrue(input.checkValidity())
     })
@@ -306,6 +314,7 @@ describe('auto-check element', function () {
 
       const completed = Promise.all([once(checker, 'loadstart'), once(checker, 'load'), once(checker, 'loadend')])
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await completed
 
       assert.deepEqual(['loadstart', 'load', 'loadend'], events)
@@ -322,6 +331,7 @@ describe('auto-check element', function () {
 
       const completed = Promise.all([once(checker, 'loadstart'), once(checker, 'load'), once(checker, 'loadend')])
       triggerInput(input, 'hub')
+      triggerBlur(input)
       await completed
 
       assert.deepEqual(['loadstart', 'load', 'loadend'], events)
@@ -350,36 +360,30 @@ describe('auto-check element', function () {
       input = null
     })
 
-    it('emits auto-check-send on input', function (done) {
+    it('emits auto-check-send on blur', function (done) {
       input.addEventListener('auto-check-send', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
-    })
-
-    it('emits auto-check-send on change', function (done) {
-      input.addEventListener('auto-check-send', () => done())
-      triggerInput(input, 'hub')
+      triggerBlur(input)
     })
 
     it('emits auto-check-start on input', function (done) {
       input.addEventListener('auto-check-start', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
+      triggerBlur(input)
     })
 
-    it('emits auto-check-start on change', function (done) {
-      input.addEventListener('auto-check-start', () => done())
-      triggerInput(input, 'hub')
-    })
-
-    it('emits auto-check-send 300 milliseconds after keypress', function (done) {
+    it('emits auto-check-send 300 milliseconds after blur', function (done) {
       input.addEventListener('auto-check-send', () => done())
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
+      triggerBlur(input)
     })
 
     it('emits auto-check-success when server responds with 200 OK', async function () {
       triggerInput(input, 'hub')
+      triggerBlur(input)
       const event = await once(input, 'auto-check-success')
       const result = await event.detail.response.text()
       assert.equal('This is a warning', result)
@@ -388,6 +392,7 @@ describe('auto-check element', function () {
     it('emits auto-check-error event when server returns an error response', async function () {
       checker.src = '/fail'
       triggerInput(input, 'hub')
+      triggerBlur(input)
       const event = await once(input, 'auto-check-error')
       const result = await event.detail.response.text()
       assert.equal('This is an error', result)
@@ -396,6 +401,7 @@ describe('auto-check element', function () {
     it('emits auto-check-complete event at the end of the lifecycle', function (done) {
       input.addEventListener('auto-check-complete', () => done())
       triggerInput(input, 'hub')
+      triggerBlur(input)
     })
 
     it('emits auto-check-send event before checking if there is a duplicate request', function (done) {
@@ -410,6 +416,7 @@ describe('auto-check element', function () {
 
       input.value = 'hub'
       input.dispatchEvent(new InputEvent('input'))
+      triggerBlur(input)
     })
 
     it('do not emit if essential attributes are missing', async function () {

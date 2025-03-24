@@ -214,14 +214,6 @@
               "type": {
                 "text": "boolean"
               }
-            },
-            {
-              "kind": "field",
-              "name": "onlyValidateOnBlur",
-              "type": {
-                "text": "boolean"
-              },
-              "readonly": true
             }
           ],
           "attributes": [
