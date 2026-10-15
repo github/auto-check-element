@@ -8,7 +8,8 @@ type Controller =
     }
 
 type State = {
-  check: (event: Event) => unknown
+  check: ReturnType<typeof debounce>
+  changeHandler: (event: Event) => unknown
   controller: Controller | null
 }
 
@@ -102,10 +103,9 @@ export class AutoCheckElement extends HTMLElement {
     if (!input) return
 
     const checker = debounce(check.bind(null, this), 300)
-    const state = {check: checker, controller: null}
-    states.set(this, state)
-
     const changeHandler = handleChange.bind(null, checker)
+    const state = {check: checker, changeHandler, controller: null}
+    states.set(this, state)
 
     input.addEventListener('blur', changeHandler)
     input.addEventListener('input', changeHandler)
@@ -122,8 +122,10 @@ export class AutoCheckElement extends HTMLElement {
     if (!state) return
     states.delete(this)
 
-    input.removeEventListener('input', setLoadingState)
-    input.removeEventListener('input', state.check)
+    input.removeEventListener('blur', state.changeHandler)
+    input.removeEventListener('input', state.changeHandler)
+    input.removeEventListener('triggervalidation', state.changeHandler)
+    state.check.cancel()
     input.setCustomValidity('')
   }
 

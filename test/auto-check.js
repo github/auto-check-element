@@ -38,6 +38,39 @@ describe('auto-check element', function () {
       input = checker.querySelector('input')
     })
 
+    it('handles validation events only once after reconnecting', function () {
+      checker.remove()
+      document.body.append(checker)
+      checker.remove()
+      document.body.append(checker)
+      const events = []
+      input.addEventListener('auto-check-start', event => events.push(event.type))
+
+      triggerInput(input, 'hub')
+      triggerBlur(input)
+      assert.deepEqual(events, ['auto-check-start'])
+
+      checker.triggerValidation()
+      assert.deepEqual(events, ['auto-check-start', 'auto-check-start'])
+
+      checker.validateOnKeystroke = true
+      triggerInput(input, 'hub2')
+      assert.deepEqual(events, ['auto-check-start', 'auto-check-start', 'auto-check-start'])
+    })
+
+    it('cancels queued validation before reconnecting', async function () {
+      input.value = 'hub'
+      checker.triggerValidation()
+      checker.remove()
+      document.body.append(checker)
+      const sent = []
+      input.addEventListener('auto-check-send', event => sent.push(event.type))
+
+      checker.triggerValidation()
+      await new Promise(resolve => setTimeout(resolve, 350))
+      assert.deepEqual(sent, ['auto-check-send'])
+    })
+
     it('does not emit on initial input change', async function () {
       const events = []
       input.addEventListener('auto-check-start', event => events.push(event.type))
