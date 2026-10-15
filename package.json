@@ -4,7 +4,8 @@
     "description": "An input element that validates its value with a server endpoint.",
     "repository": "github/auto-check-element",
     "files": [
-        "dist"
+        "dist",
+        "custom-elements.json"
     ],
     "main": "dist/bundle.js",
     "module": "dist/index.js",
